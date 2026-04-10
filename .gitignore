@@ -15,27 +15,9 @@
 /build/  
 /dist/
 
-# Go modules
-
-vendor/
-
-# Go workspace
-
-go.work  
-go.work.sum
-
-# Dependency directories
-
-Godeps/
-
 # Test binaries
 
 *.test
-
-# Coverage files
-
-*.cover  
-coverage.out
 
 # Go cache
 
@@ -46,9 +28,6 @@ go-build/
 
 .vscode/  
 .idea/  
-*.swp  
-*.swo  
-*~
 
 # OS files
 
