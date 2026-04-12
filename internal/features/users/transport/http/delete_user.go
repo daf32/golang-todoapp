@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
+	core_http_request "github.com/daf32/golang-todoapp/internal/core/transport/http/request"
 	core_http_response "github.com/daf32/golang-todoapp/internal/core/transport/http/response"
-	core_http_utils "github.com/daf32/golang-todoapp/internal/core/transport/http/utils"
 )
 
 func (h *UsersHTTPHanlder) DeleteUser(rw http.ResponseWriter, r *http.Request) {
@@ -13,7 +13,7 @@ func (h *UsersHTTPHanlder) DeleteUser(rw http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(ctx)
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
 
-	userID, err := core_http_utils.GetIntPathValues(r, "id")
+	userID, err := core_http_request.GetIntPathValues(r, "id")
 	if err != nil {
 		responseHandler.ErrorResponse(
 			err,

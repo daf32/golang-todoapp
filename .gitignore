@@ -1,18 +1,18 @@
 # Binaries
 
-*.exe  
-*.exe~  
-*.dll  
-*.so  
-*.dylib  
-*.test  
-*.out  
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
 *.app
 
 # Go build
 
-/bin/  
-/build/  
+/bin/
+/build/
 /dist/
 
 # Test binaries
@@ -21,17 +21,17 @@
 
 # Go cache
 
-.cache/  
+.cache/
 go-build/
 
 # IDE / Editor files
 
-.vscode/  
-.idea/  
+.vscode/
+.idea/
 
 # OS files
 
-.DS_Store  
+.DS_Store
 Thumbs.db
 
 # Logs
@@ -44,6 +44,6 @@ Thumbs.db
 
 # Temporary files
 
-tmp/  
+tmp/
 temp/
 out

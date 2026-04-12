@@ -7,7 +7,7 @@ import (
 
 	"github.com/daf32/golang-todoapp/internal/core/domain"
 	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
-	"github.com/jackc/pgx/v5"
+	core_postgres_pool "github.com/daf32/golang-todoapp/internal/core/repository/postgres/pool"
 )
 
 func (r *UsersRepository) PatchUser(
@@ -17,7 +17,7 @@ func (r *UsersRepository) PatchUser(
 ) (domain.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
-	
+
 	query := `
 	UPDATE todoapp.users
 	SET
@@ -27,7 +27,7 @@ func (r *UsersRepository) PatchUser(
 	WHERE id=$3 AND version=$4
 	RETURNING id, version, full_name, phone_number;
 	`
-	
+
 	row := r.pool.QueryRow(
 		ctx,
 		query,
@@ -36,7 +36,7 @@ func (r *UsersRepository) PatchUser(
 		id,
 		user.Version,
 	)
-	
+
 	var userModel UserModel
 	err := row.Scan(
 		&userModel.ID,
@@ -45,23 +45,23 @@ func (r *UsersRepository) PatchUser(
 		&userModel.PhoneNumber,
 	)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, core_postgres_pool.ErrNoRows) {
 			return domain.User{}, fmt.Errorf(
 				"user with id='%d' concurrently accessed: %w",
 				id,
 				core_errors.ErrConfict,
 			)
 		}
-		
+
 		return domain.User{}, fmt.Errorf("scan error: %w", err)
 	}
-	
+
 	userDomain := domain.NewUser(
 		userModel.ID,
 		userModel.Version,
 		user.FullName,
 		user.PhoneNumber,
 	)
-	
+
 	return userDomain, nil
 }
