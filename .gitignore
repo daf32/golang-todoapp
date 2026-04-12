@@ -1,58 +1,37 @@
 # Binaries
 
-*.exe  
-*.exe~  
-*.dll  
-*.so  
-*.dylib  
-*.test  
-*.out  
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
 *.app
 
 # Go build
 
-/bin/  
-/build/  
+/bin/
+/build/
 /dist/
-
-# Go modules
-
-vendor/
-
-# Go workspace
-
-go.work  
-go.work.sum
-
-# Dependency directories
-
-Godeps/
 
 # Test binaries
 
 *.test
 
-# Coverage files
-
-*.cover  
-coverage.out
-
 # Go cache
 
-.cache/  
+.cache/
 go-build/
 
 # IDE / Editor files
 
-.vscode/  
-.idea/  
-*.swp  
-*.swo  
-*~
+.vscode/
+.idea/
 
 # OS files
 
-.DS_Store  
+.DS_Store
 Thumbs.db
 
 # Logs
@@ -65,6 +44,6 @@ Thumbs.db
 
 # Temporary files
 
-tmp/  
+tmp/
 temp/
 out
