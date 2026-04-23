@@ -29,7 +29,16 @@ env-port-forward:
 env-port-close:
 	@docker compose down port-forwarder
 
-# ============	
+logs-cleanup:
+	@read -p "Очистить все log файлы? Опастность утери логов. [y/N]: " ans; \
+	if [ "$$ans" = "y" ]; then \
+		rm -rf ${PROJECT_ROOT}/out/logs && \
+		echo "Файлы логов очищены"; \
+	else \
+		echo "Очиска логов отменена"; \
+	fi
+
+# ============
 # Migrations
 # ============
 
@@ -52,17 +61,17 @@ migrate-action:
 	docker compose run --rm todoapp-postgres-migrate \
 		-path /migrations \
 		-database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@todoapp-postgres:5432/${POSTGRES_DB}?sslmode=disable \
-		"$(action)"	
+		"$(action)"
 
 migrate-up:
-	@make migrate-action action=up	
+	@make migrate-action action=up
 
 migrate-down:
 	@make migrate-action action=down
 
-# ============	
+# ============
 # Startap app
-# ============	
+# ============
 
 todoapp-run:
 	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
