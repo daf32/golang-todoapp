@@ -68,6 +68,13 @@ migrate-up:
 
 migrate-down:
 	@make migrate-action action=down
+	
+# ===========
+# Utils
+# ==========
+
+ps:
+	@docker compose ps
 
 # ============
 # Startap app
@@ -78,3 +85,6 @@ todoapp-run:
 	export POSTGRES_HOST=localhost && \
 	go mod tidy && \
 	go run ${PROJECT_ROOT}/cmd/todoapp/main.go
+
+todoapp-deploy:
+	@docker compose up -d --build todoapp
