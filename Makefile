@@ -69,9 +69,9 @@ migrate-up:
 migrate-down:
 	@make migrate-action action=down
 	
-# ===========
+# ============
 # Utils
-# ==========
+# ============
 
 ps:
 	@docker compose ps
@@ -86,5 +86,12 @@ todoapp-run:
 	go mod tidy && \
 	go run ${PROJECT_ROOT}/cmd/todoapp/main.go
 
+# ============
+# Deploy
+# ============
+
 todoapp-deploy:
 	@docker compose up -d --build todoapp
+
+todoapp-undeploy:
+	@docker compose down todoapp
