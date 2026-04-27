@@ -8,6 +8,16 @@ import (
 	core_http_response "github.com/daf32/golang-todoapp/internal/core/transport/http/response"
 )
 
+// DeleteUser 	 godoc
+// @Summary 	 Delete user
+// @Description  Delete an existing user by id
+// @Tags 		 users 
+// @Param 		 id path int true "ID of the user to be deleted"
+// @Success 	 204 "Successful user deleting"
+// @Failure 	 400 {object} core_http_response.ErrorResponse "Bad request" 
+// @Failure 	 404 {object} core_http_response.ErrorResponse "User not found"
+// @Failure 	 500 {object} core_http_response.ErrorResponse "Internal server error"
+// @Router 		 /users/{id} [delete]
 func (h *UsersHTTPHanlder) DeleteUser(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)
