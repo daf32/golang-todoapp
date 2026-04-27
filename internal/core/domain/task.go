@@ -102,7 +102,7 @@ func (t *Task) Validate() error {
 			)
 		}
 
-		if t.CompletedAt.Before(*t.CompletedAt) {
+		if t.CompletedAt.Before(t.CreatedAt) {
 			return fmt.Errorf(
 				"`CompleatedAt` can't be before `CreatedAt`: %w",
 				core_errors.ErrInvalidArgument,
