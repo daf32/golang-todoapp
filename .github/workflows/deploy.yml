@@ -89,10 +89,21 @@ jobs:
               export PROJECT_ROOT='${{ secrets.DEPLOY_PATH }}'
               cd '${{ secrets.DEPLOY_PATH }}'
               mkdir -p out/logs out/pgdata
-              docker compose up -d todoapp-postgres
               set -a
               . ./.env
               set +a
+              docker compose up -d todoapp-postgres
+              for i in $(seq 1 30); do
+              if docker exec todoapp-env-postgres pg_isready -U "${POSTGRES_USER}"
+                -d "${POSTGRES_DB}" >/dev/null 2>&1; then
+              break
+              fi
+              if [ "${i}" -eq 30 ]; then
+                echo "Postgres did not become ready in time"
+              exit 1
+              fi
+              sleep 2
+              done
               docker compose run --rm todoapp-postgres-migrate \
                 -path /migrations \
                 -database 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@todoapp-postgres:5432/${POSTGRES_DB}?sslmode=disable' \
