@@ -17,7 +17,7 @@ func NewStatistics(
 ) Statistics {
 	return Statistics{
 		TasksCreated:               taskCreated,
-		TasksCompleted:             taskCreated,
+		TasksCompleted:             tasksCompleted,
 		TasksCompletedRate:         tasksCompletedRate,
 		TasksAverageCompletionTime: tasksAverageCompletionTime,
 	}

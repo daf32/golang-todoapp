@@ -68,7 +68,7 @@ migrate-up:
 
 migrate-down:
 	@make migrate-action action=down
-	
+
 # ============
 # Utils
 # ============
@@ -106,4 +106,14 @@ swagger-gen:
 		-g cmd/todoapp/main.go \
 		-o docs \
 		--parseInternal \
-		--parseDependency	
+		--parseDependency
+
+# ============
+# Tests
+# ============
+
+test:
+	@go test -v ./... 2>&1 | grep -v '\[no test files\]'
+
+generate:
+	@mockery
