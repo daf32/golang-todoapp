@@ -2,6 +2,7 @@ package core_http_middleware
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
@@ -17,18 +18,33 @@ const (
 func CORS(allowedOriginsList []string) Middleware {
 	allowedOrigins := make(map[string]struct{})
 	for _, origin := range allowedOriginsList {
+		origin = strings.TrimSpace(origin)
+		if origin == "" {
+			continue
+		}
+
 		allowedOrigins[origin] = struct{}{}
 	}
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			origin := r.Header.Get("Origin")
+			origin := strings.TrimSpace(r.Header.Get("Origin"))
 
-			if _, ok := allowedOrigins[origin]; ok {
-				w.Header().Set("Access-Control-Allow-Origin", origin)
-				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
-				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			if origin == "" {
+				next.ServeHTTP(w, r)
+				return
 			}
+
+			w.Header().Add("Vary", "Origin")
+
+			if _, ok := allowedOrigins[origin]; !ok {
+				http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+				return
+			}
+
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
 			if r.Method == http.MethodOptions {
 				w.WriteHeader(http.StatusOK)

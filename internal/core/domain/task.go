@@ -97,21 +97,21 @@ func (t *Task) Validate() error {
 	if t.Completed {
 		if t.CompletedAt == nil {
 			return fmt.Errorf(
-				"`CompleatedAt` can't be `nil` if `Completed`==`true: %w`",
+				"`CompletedAt` can't be `nil` if `Completed`==`true: %w`",
 				core_errors.ErrInvalidArgument,
 			)
 		}
 
 		if t.CompletedAt.Before(t.CreatedAt) {
 			return fmt.Errorf(
-				"`CompleatedAt` can't be before `CreatedAt`: %w",
+				"`CompletedAt` can't be before `CreatedAt`: %w",
 				core_errors.ErrInvalidArgument,
 			)
 		}
 	} else {
 		if t.CompletedAt != nil {
 			return fmt.Errorf(
-				"`CompleateAt` must be `nil` if `CompleateAt` == `false`: %w",
+				"`CompleteAt` must be `nil` if `Complete` == `false`: %w",
 				core_errors.ErrInvalidArgument,
 			)
 		}

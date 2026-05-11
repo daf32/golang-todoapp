@@ -104,6 +104,45 @@ To stop it:
 make todoapp-undeploy
 ```
 
+## Deploy via GitHub Actions
+
+The repository includes `.github/workflows/deploy.yml`. It deploys on pushes to `main` or on manual `workflow_dispatch`.
+
+### Server prerequisites
+
+The target host must have:
+
+- Docker with `docker compose`
+- `rsync`
+- `base64`
+- SSH access for the user from `DEPLOY_USER`
+- write access to `DEPLOY_PATH`
+
+The workflow copies the repository to the server with `rsync`, writes `.env` from a GitHub secret, starts Postgres, waits for readiness, runs migrations, and rebuilds `todoapp`.
+
+### Required GitHub secrets
+
+Set these in the repository or in the `production` environment:
+
+| Secret | Description | Example |
+|---|---|---|
+| `DEPLOY_HOST` | Public server IP or domain | `203.0.113.10` |
+| `DEPLOY_PORT` | SSH port | `22` |
+| `DEPLOY_USER` | SSH user on the server | `root` |
+| `DEPLOY_PATH` | Absolute deploy directory on the server | `/root/apps/golang-todoapp` |
+| `DEPLOY_SSH_KEY` | Private SSH key content used by Actions | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
+| `DEPLOY_ENV_B64` | Base64-encoded `.env` contents | `SFRUUF9BRERSPTo1MDUw...` |
+
+Generate `DEPLOY_ENV_B64` from your production `.env`:
+
+```bash
+# macOS
+base64 < .env | tr -d '\n'
+
+# Linux
+base64 -w 0 .env
+```
+
 ## Common Makefile commands
 
 - **`make env-up`**: start Postgres container
