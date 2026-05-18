@@ -7,6 +7,7 @@ import (
 
 	"github.com/daf32/golang-todoapp/internal/core/domain"
 	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
+	core_models "github.com/daf32/golang-todoapp/internal/core/repository/models"
 	core_postgres_pool "github.com/daf32/golang-todoapp/internal/core/repository/postgres/pool"
 )
 
@@ -18,7 +19,7 @@ func (r *UsersRepository) GetUser(
 	defer cancel()
 
 	query := `
-	SELECT id, version, full_name, phone_number FROM todoapp.users
+	SELECT id, version, full_name, phone_number, email, password_hash, role FROM todoapp.users
 	WHERE id=$1;
 	`
 
@@ -28,12 +29,15 @@ func (r *UsersRepository) GetUser(
 		id,
 	)
 
-	var userModel UserModel
+	var userModel core_models.UserModel
 	err := row.Scan(
 		&userModel.ID,
 		&userModel.Version,
 		&userModel.FullName,
 		&userModel.PhoneNumber,
+		&userModel.Email,
+		&userModel.PasswordHash,
+		&userModel.Role,
 	)
 
 	if err != nil {
@@ -48,12 +52,13 @@ func (r *UsersRepository) GetUser(
 		return domain.User{}, fmt.Errorf("scan error: %w", err)
 	}
 
-	userDomain := domain.NewUser(
+	return domain.NewUser(
 		userModel.ID,
 		userModel.Version,
 		userModel.FullName,
 		userModel.PhoneNumber,
-	)
-
-	return userDomain, nil
+		userModel.Email,
+		userModel.PasswordHash,
+		userModel.Role,
+	), nil
 }

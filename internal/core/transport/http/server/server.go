@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/daf32/golang-todoapp/docs"
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
@@ -70,6 +72,25 @@ func (s *HTTPServer) RegisterSwagger() {
 		},
 	)
 }
+
+func (s *HTTPServer) RegisterSPA(spaPath string) {
+	absSpaPath, err := filepath.Abs(spaPath)
+	if err != nil {
+		s.log.Fatal("failed to get absolute path for SPA", zap.Error(err))
+	}
+
+	fileServer := http.FileServer(http.Dir(absSpaPath))
+
+	s.mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := os.Stat(filepath.Join(absSpaPath, r.URL.Path))
+		if os.IsNotExist(err) {
+			http.ServeFile(w, r, filepath.Join(absSpaPath, "index.html"))
+			return
+		}
+		fileServer.ServeHTTP(w, r)
+	}))
+}
+
 
 func (s *HTTPServer) Run(ctx context.Context) error {
 	mux := core_http_middleware.ChainMiddleware(s.mux, s.middleware...)

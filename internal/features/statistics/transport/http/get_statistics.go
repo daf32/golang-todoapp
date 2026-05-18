@@ -23,11 +23,13 @@ type GetStatisticsResponse struct {
 // @Description   Get a specific statistics by ID
 // @Tags 		  statistics
 // @Produce		  json
+// @Security 	  BearerAuth
 // @Param 		  user_id query int false "Filter statistics by user id"
 // @Param 		  from query string false "Beginning of the statistics review period (inclusive), format: YYYY-MM-DD"
 // @Param 		  to query string false "End of the statistics review period, not (inclusive), format: YYYY-MM-DD"
 // @Success 	  200 {object} GetStatisticsResponse "Statistics seccessfuly found"
 // @Failure 	  400 {object} core_http_response.ErrorResponse  "Bad request"
+// @Failure 	  401 {object} core_http_response.ErrorResponse "Unauthorized"
 // @Failure 	  404 {object} core_http_response.ErrorResponse  "Statistics not found"
 // @Failure 	  500 {object} core_http_response.ErrorResponse "Internal server error"
 // @Router 	 	  /statistics [get]

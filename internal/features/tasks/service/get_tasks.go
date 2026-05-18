@@ -10,6 +10,7 @@ import (
 
 func (s *TasksService) GetTasks(
 	ctx context.Context,
+	actor domain.Actor,
 	userID *int,
 	limit *int,
 	offset *int,
@@ -25,6 +26,19 @@ func (s *TasksService) GetTasks(
 			"offset must be non negative: %w",
 			core_errors.ErrInvalidArgument,
 		)
+	}
+
+	if !actor.IsAdmin() {
+		if userID != nil && *userID != actor.UserID {
+			return nil, fmt.Errorf(
+				"user id=%d has no access to tasks of user id=%d: %w",
+				actor.UserID,
+				*userID,
+				core_errors.ErrForbidden,
+			)
+		}
+
+		userID = &actor.UserID
 	}
 
 	tasks, err := s.tasksRepository.GetTasks(

@@ -11,10 +11,13 @@ import (
 // DeleteUser 	 godoc
 // @Summary 	 Delete user
 // @Description  Delete an existing user by id
-// @Tags 		 users 
+// @Tags 		 users
+// @Security 	 BearerAuth
 // @Param 		 id path int true "ID of the user to be deleted"
 // @Success 	 204 "Successful user deleting"
-// @Failure 	 400 {object} core_http_response.ErrorResponse "Bad request" 
+// @Failure 	 400 {object} core_http_response.ErrorResponse "Bad request"
+// @Failure 	 401 {object} core_http_response.ErrorResponse "Unauthorized"
+// @Failure 	 403 {object} core_http_response.ErrorResponse "Forbidden"
 // @Failure 	 404 {object} core_http_response.ErrorResponse "User not found"
 // @Failure 	 500 {object} core_http_response.ErrorResponse "Internal server error"
 // @Router 		 /users/{id} [delete]
@@ -38,6 +41,8 @@ func (h *UsersHTTPHanlder) DeleteUser(rw http.ResponseWriter, r *http.Request) {
 			err,
 			"failed to delete user",
 		)
+
+		return
 	}
 
 	responseHandler.NoContentResponse()

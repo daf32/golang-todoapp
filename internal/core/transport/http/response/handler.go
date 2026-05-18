@@ -43,7 +43,7 @@ func (h *HTTPResponseHandler) NoContentResponse() {
 
 func (h *HTTPResponseHandler) HTMLResponse(html []byte) {
 	h.rw.WriteHeader(http.StatusOK)
-	
+
 	h.rw.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if _, err := h.rw.Write(html); err != nil {
 		h.log.Error("write HTML HTTP response", zap.Error(err))
@@ -67,6 +67,14 @@ func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
 
 	case errors.Is(err, core_errors.ErrConfict):
 		statusCode = http.StatusConflict
+		logFunc = h.log.Warn
+
+	case errors.Is(err, core_errors.ErrInvalidCredentials):
+		statusCode = http.StatusUnauthorized
+		logFunc = h.log.Warn
+
+	case errors.Is(err, core_errors.ErrForbidden):
+		statusCode = http.StatusForbidden
 		logFunc = h.log.Warn
 
 	default:

@@ -1,6 +1,6 @@
 # Golang Todo App
 
-A Go REST API for a todo application (**users**, **tasks**, **statistics**) with a minimal web UI on `/`.
+A Go REST API for a todo application (**users**, **tasks**, **statistics**) with a React (Vite) frontend served on `/`.
 
 - **API base**: `/api/v1`
 - **Swagger UI**: `/swagger/` (spec at `/swagger/doc.json`)
@@ -9,6 +9,7 @@ A Go REST API for a todo application (**users**, **tasks**, **statistics**) with
 ## Tech stack
 
 - **Language**: Go (recommended `1.22+`; Docker image builds with Go `1.25.6`)
+- **Frontend**: React 19 + Vite 8 (built during Docker image build; output served from `frontend/dist`)
 - **HTTP**: standard library `net/http` (no external framework)
 - **Database**: PostgreSQL
 - **DB driver**: `jackc/pgx/v5`
@@ -106,7 +107,9 @@ make todoapp-undeploy
 
 ## Deploy via GitHub Actions
 
-The repository includes `.github/workflows/deploy.yml`. It deploys on pushes to `main` or on manual `workflow_dispatch`.
+The repository includes `.github/workflows/deploy.yml`. It is triggered **manually** via the GitHub Actions UI — go to **Actions → Deploy → Run workflow**. There is no automatic deploy on push.
+
+The `verify` job runs Go tests, builds the Go binary, and builds the React frontend (`npm ci && npm run build`) before any deployment proceeds. The `deploy` job then rsyncs the source (excluding `node_modules`) to the server and rebuilds the Docker image — the Dockerfile handles the full frontend build on the server side via a Node multi-stage build.
 
 ### Server prerequisites
 
