@@ -9,9 +9,14 @@ import (
 
 func (s *UsersService) PatchUser(
 	ctx context.Context,
+	actor domain.Actor,
 	id int,
 	patch domain.UserPatch,
 ) (domain.User, error) {
+	if err := authorizeUserAccess(actor, id); err != nil {
+		return domain.User{}, err
+	}
+
 	user, err := s.usersRepository.GetUser(ctx, id)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("get user: %w", err)

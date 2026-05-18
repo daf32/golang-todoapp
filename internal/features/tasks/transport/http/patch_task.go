@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"github.com/daf32/golang-todoapp/internal/core/domain"
+	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
+	core_http_middleware "github.com/daf32/golang-todoapp/internal/core/transport/http/middleware"
 	core_http_request "github.com/daf32/golang-todoapp/internal/core/transport/http/request"
 	core_http_response "github.com/daf32/golang-todoapp/internal/core/transport/http/response"
 	core_http_types "github.com/daf32/golang-todoapp/internal/core/transport/http/types"
@@ -58,10 +60,13 @@ func (r *PatchTaskRequest) Validate() error {
 // @Tags 		 tasks
 // @Accept 		 json
 // @Produce		 json
+// @Security 	 BearerAuth
 // @Param 		 id path int true "Task id to change"
 // @Param 		 request body PatchTaskRequest true "PatchTask request body"
 // @Success 	 200 {object} PatchUserResponse "Seccessfull changed task"
 // @Failure 	 400 {object} core_http_response.ErrorResponse  "Bad request"
+// @Failure 	 401 {object} core_http_response.ErrorResponse "Unauthorized"
+// @Failure 	 403 {object} core_http_response.ErrorResponse "Forbidden"
 // @Failure 	 404 {object} core_http_response.ErrorResponse  "Task not found"
 // @Failure 	 409 {object} core_http_response.ErrorResponse  "Conflict"
 // @Failure 	 500 {object} core_http_response.ErrorResponse "Internal server error"
@@ -70,6 +75,16 @@ func (h *TasksHTTPHandler) PatchTask(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+
+	actor, ok := core_http_middleware.GetActor(r)
+	if !ok {
+		responseHandler.ErrorResponse(
+			core_errors.ErrInvalidCredentials,
+			"failed to get authenticated actor from request context",
+		)
+
+		return
+	}
 
 	taskID, err := core_http_request.GetIntPathValues(r, "id")
 	if err != nil {
@@ -93,7 +108,7 @@ func (h *TasksHTTPHandler) PatchTask(rw http.ResponseWriter, r *http.Request) {
 
 	taskPatch := taskPatchFromRequest(request)
 
-	taskDomain, err := h.tasksService.PatchTask(ctx, taskID, taskPatch)
+	taskDomain, err := h.tasksService.PatchTask(ctx, actor, taskID, taskPatch)
 	if err != nil {
 		responseHandler.ErrorResponse(
 			err,

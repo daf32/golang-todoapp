@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/daf32/golang-todoapp/internal/core/domain"
+	core_models "github.com/daf32/golang-todoapp/internal/core/repository/models"
 )
 
 func (r *UsersRepository) GetUsers(
@@ -16,7 +17,7 @@ func (r *UsersRepository) GetUsers(
 	defer cancel()
 
 	query := `
-	SELECT id, version, full_name, phone_number FROM todoapp.users
+	SELECT id, version, full_name, phone_number, email, password_hash, role FROM todoapp.users
 	ORDER BY id ASC
 	LIMIT $1
 	OFFSET $2;
@@ -33,15 +34,18 @@ func (r *UsersRepository) GetUsers(
 	}
 	defer rows.Close()
 
-	var userModels []UserModel
+	var userModels []core_models.UserModel
 	for rows.Next() {
-		var userModel UserModel
+		var userModel core_models.UserModel
 
 		err := rows.Scan(
 			&userModel.ID,
 			&userModel.Version,
 			&userModel.FullName,
 			&userModel.PhoneNumber,
+			&userModel.Email,
+			&userModel.PasswordHash,
+			&userModel.Role,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("scan users: %w", err)
@@ -53,7 +57,5 @@ func (r *UsersRepository) GetUsers(
 		return nil, fmt.Errorf("next rows: %w", err)
 	}
 
-	usersDomains := userDomainsFromModels(userModels)
-
-	return usersDomains, nil
+	return core_models.UserDomainsFromModels(userModels), nil
 }

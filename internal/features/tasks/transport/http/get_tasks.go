@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
+	core_http_middleware "github.com/daf32/golang-todoapp/internal/core/transport/http/middleware"
 	core_http_request "github.com/daf32/golang-todoapp/internal/core/transport/http/request"
 	core_http_response "github.com/daf32/golang-todoapp/internal/core/transport/http/response"
 )
@@ -16,17 +18,30 @@ type GetTasksResponse []TaskDTOResponse
 // @Description  View tasks list with optional pagination
 // @Tags 		 tasks
 // @Produce		 json
+// @Security 	 BearerAuth
 // @Param 		 user_id query int false "Filter by task id"
 // @Param 		 limit query int false "Tasks page size"
 // @Param 		 offset query int false "Tasks page shifting"
 // @Success 	 200 {object} GetTasksResponse "Seccessfull get a list of tasks"
 // @Failure 	 400 {object} core_http_response.ErrorResponse  "Bad request"
+// @Failure 	 401 {object} core_http_response.ErrorResponse "Unauthorized"
+// @Failure 	 403 {object} core_http_response.ErrorResponse "Forbidden"
 // @Failure 	 500 {object} core_http_response.ErrorResponse "Internal server error"
 // @Router 	 	 /tasks [get]
 func (h *TasksHTTPHandler) GetTasks(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+
+	actor, ok := core_http_middleware.GetActor(r)
+	if !ok {
+		responseHandler.ErrorResponse(
+			core_errors.ErrInvalidCredentials,
+			"failed to get authenticated actor from request context",
+		)
+
+		return
+	}
 
 	userID, limit, offset, err := getUserIDLimitOffsetQueryParams(r)
 	if err != nil {
@@ -40,6 +55,7 @@ func (h *TasksHTTPHandler) GetTasks(rw http.ResponseWriter, r *http.Request) {
 
 	tasksDomains, err := h.tasksService.GetTasks(
 		ctx,
+		actor,
 		userID,
 		limit,
 		offset,
@@ -49,12 +65,12 @@ func (h *TasksHTTPHandler) GetTasks(rw http.ResponseWriter, r *http.Request) {
 			err,
 			"failed to get tasks",
 		)
-		
+
 		return
 	}
-	
+
 	response := GetTasksResponse(taskDTOsFromDomains(tasksDomains))
-	
+
 	responseHandler.JSONResponse(response, http.StatusOK)
 }
 

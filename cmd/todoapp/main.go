@@ -13,6 +13,9 @@ import (
 	core_pgx_pool "github.com/daf32/golang-todoapp/internal/core/repository/postgres/pool/pgx"
 	core_http_middleware "github.com/daf32/golang-todoapp/internal/core/transport/http/middleware"
 	core_http_server "github.com/daf32/golang-todoapp/internal/core/transport/http/server"
+	auth_postgres_repository "github.com/daf32/golang-todoapp/internal/features/auth/repository/postgres"
+	auth_service "github.com/daf32/golang-todoapp/internal/features/auth/service"
+	auth_transport_http "github.com/daf32/golang-todoapp/internal/features/auth/transport/http"
 	statistics_postgres_repository "github.com/daf32/golang-todoapp/internal/features/statistics/repository/postgres"
 	statistics_service "github.com/daf32/golang-todoapp/internal/features/statistics/service"
 	statistics_transport_http "github.com/daf32/golang-todoapp/internal/features/statistics/transport/http"
@@ -22,19 +25,31 @@ import (
 	users_postgres_repository "github.com/daf32/golang-todoapp/internal/features/users/repository/postgres"
 	users_service "github.com/daf32/golang-todoapp/internal/features/users/service"
 	users_transport_http "github.com/daf32/golang-todoapp/internal/features/users/transport/http"
-	web_fs_repository "github.com/daf32/golang-todoapp/internal/features/web/repository/file_system"
-	web_service "github.com/daf32/golang-todoapp/internal/features/web/service"
-	web_transport_http "github.com/daf32/golang-todoapp/internal/features/web/transport/http"
 	"go.uber.org/zap"
 
 	_ "github.com/daf32/golang-todoapp/docs"
 )
+
+func WithMiddleware(
+	routes []core_http_server.Route,
+	m ...core_http_middleware.Middleware,
+) []core_http_server.Route {
+	for i := range routes {
+		routes[i].Middleware = append(m, routes[i].Middleware...)
+	}
+
+	return routes
+}
 
 // @title 		 Golang Todo API
 // @version 	 1.0
 // @description  Todo Application REST-API scheme
 // @host 		 127.0.0.1:5050
 // @BasePath 	 /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer {access_token}"
 func main() {
 	cfg := core_config.NewConfigMust()
 	time.Local = cfg.TimeZone
@@ -80,10 +95,16 @@ func main() {
 	statisticsService := statistics_service.NewStatisticsService(statisticsRepository)
 	statisticsTransportHTTP := statistics_transport_http.NewStatisticsHTTPHandler(statisticsService)
 
-	logger.Debug("initializing featrure", zap.String("feature", "web"))
-	webRepository := web_fs_repository.NewWebRepository()
-	webService := web_service.NewWebService(webRepository)
-	webTransportHTTP := web_transport_http.NewWebHTTPHandler(webService)
+	logger.Debug("initializing feature", zap.String("feature", "auth"))
+	refreshTokenRepository := auth_postgres_repository.NewRefreshTokenRepository(pool)
+	authService := auth_service.NewAuthService(
+		refreshTokenRepository,
+		*usersRepository,
+		cfg.JWTSecret,
+		cfg.AccessTokenExpiry,
+		cfg.RefreshTokenExpiry,
+	)
+	authTransportHTTP := auth_transport_http.NewAuthHTTPHandler(authService)
 
 	logger.Debug("initializing HTTP server")
 	httpConfig := core_http_server.NewConfigMust()
@@ -97,10 +118,13 @@ func main() {
 		core_http_middleware.Panic(),
 	)
 
+	authMW := core_http_middleware.Auth(authService)
+
 	apiVersionRouterV1 := core_http_server.NewApiVersionRouter(core_http_server.ApiVersion1)
-	apiVersionRouterV1.RegisterRoutes(usersTransportHTTP.Routes()...)
-	apiVersionRouterV1.RegisterRoutes(tasksTransportHTTP.Routes()...)
-	apiVersionRouterV1.RegisterRoutes(statisticsTransportHTTP.Routes()...)
+	apiVersionRouterV1.RegisterRoutes(WithMiddleware(usersTransportHTTP.Routes(), authMW)...)
+	apiVersionRouterV1.RegisterRoutes(WithMiddleware(tasksTransportHTTP.Routes(), authMW)...)
+	apiVersionRouterV1.RegisterRoutes(WithMiddleware(statisticsTransportHTTP.Routes(), authMW)...)
+	apiVersionRouterV1.RegisterRoutes(authTransportHTTP.Routes()...)
 
 	/*
 		Example of usage apiVersionRouter V2 with separate Middlewares
@@ -116,9 +140,8 @@ func main() {
 		apiVersionRouterV1,
 		// apiVersionRouterV2,
 	)
-	httpServer.RegisterRoutes(webTransportHTTP.Routes()...)
+	httpServer.RegisterSPA("frontend/dist")
 	httpServer.RegisterSwagger()
-
 	if err := httpServer.Run(ctx); err != nil {
 		logger.Error("HTTP server run error", zap.Error(err))
 	}

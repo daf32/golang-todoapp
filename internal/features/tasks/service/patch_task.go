@@ -9,6 +9,7 @@ import (
 
 func (s *TasksService) PatchTask(
 	ctx context.Context,
+	actor domain.Actor,
 	id int,
 	patch domain.TaskPatch,
 ) (domain.Task, error) {
@@ -16,15 +17,19 @@ func (s *TasksService) PatchTask(
 	if err != nil {
 		return domain.Task{}, fmt.Errorf("get task: %w", err)
 	}
-	
+
+	if err := authorizeTaskAccess(actor, task); err != nil {
+		return domain.Task{}, err
+	}
+
 	if err := task.ApplyPatch(patch); err != nil {
 		return domain.Task{}, fmt.Errorf("apply task patch: %w", err)
 	}
-	
+
 	patchedTask, err := s.tasksRepository.PatchTask(ctx, id, task)
 	if err != nil {
 		return domain.Task{}, fmt.Errorf("patch task: %w", err)
 	}
-	
+
 	return patchedTask, nil
 }

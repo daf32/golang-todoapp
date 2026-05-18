@@ -15,8 +15,247 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Login user in system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login user",
+                "parameters": [
+                    {
+                        "description": "LoginUser request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.LoginUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Seccessfull login user",
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.LoginUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Revoke the provided refresh token for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout user",
+                "parameters": [
+                    {
+                        "description": "LogoutUser request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.LogoutUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful user logout"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Refresh token not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "description": "Obtain a new access token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Refresh tokens",
+                "parameters": [
+                    {
+                        "description": "RefreshToken request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.RefreshRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Seccessfull refresh token",
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.RefreshResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Create new user in system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Create user",
+                "parameters": [
+                    {
+                        "description": "CreateUser request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Seccessfull created user",
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.CreateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/statistics": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get a specific statistics by ID",
                 "produces": [
                     "application/json"
@@ -58,6 +297,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Statistics not found",
                         "schema": {
@@ -75,6 +320,11 @@ const docTemplate = `{
         },
         "/tasks": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "View tasks list with optional pagination",
                 "produces": [
                     "application/json"
@@ -119,6 +369,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
@@ -128,6 +390,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create new task in system",
                 "consumes": [
                     "application/json"
@@ -163,6 +430,18 @@ const docTemplate = `{
                             "type": "obj"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
@@ -174,6 +453,11 @@ const docTemplate = `{
         },
         "/tasks/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get a specific task by ID",
                 "produces": [
                     "application/json"
@@ -204,6 +488,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Task not found",
                         "schema": {
@@ -219,6 +515,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete an existing task by id",
                 "tags": [
                     "tasks"
@@ -243,6 +544,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Task not found",
                         "schema": {
@@ -258,6 +571,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Change existing task information\n### Logic update fields (Three-state logic):\n1. **The field is not transmitted**: ` + "`" + `description` + "`" + ` ignored, the value in the database does not change\n2. **Passed value**: ` + "`" + `\"description` + "`" + `\": \"Play basketball at 6 pm\"` + "`" + ` - set new description value\n3. **Passed null**: ` + "`" + `\"description` + "`" + `\": \"null\"` + "`" + ` - clear a field in the database (set to NULL)\nRestrictions: ` + "`" + `title ` + "`" + ` and ` + "`" + `completed` + "`" + ` can't be null",
                 "consumes": [
                     "application/json"
@@ -300,6 +618,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Task not found",
                         "schema": {
@@ -323,6 +653,11 @@ const docTemplate = `{
         },
         "/users": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "View users list with optional pagination",
                 "produces": [
                     "application/json"
@@ -351,7 +686,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/internal_features_users_transport_http.UserDTOResponse"
+                                "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_dto.UserDTOResponse"
                             }
                         }
                     },
@@ -361,46 +696,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
                     },
-                    "500": {
-                        "description": "Internal server error",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create new user in system",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Create user",
-                "parameters": [
-                    {
-                        "description": "CreateUser request body",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_features_users_transport_http.CreateUserRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Seccessfull created user",
-                        "schema": {
-                            "$ref": "#/definitions/internal_features_users_transport_http.CreateUserResponse"
-                        }
                     },
-                    "400": {
-                        "description": "Bad request",
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
@@ -416,6 +719,11 @@ const docTemplate = `{
         },
         "/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get a specific user by ID",
                 "produces": [
                     "application/json"
@@ -446,6 +754,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "User not found",
                         "schema": {
@@ -461,6 +781,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete an existing user by id",
                 "tags": [
                     "users"
@@ -485,6 +810,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "User not found",
                         "schema": {
@@ -500,6 +837,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Change existing user information\n### Logic update fields (Three-state logic):\n1. **The field is not transmitted**: ` + "`" + `phone_number` + "`" + ` ignored, the value in the database does not change\n2. **Passed value**: ` + "`" + `\"phone_number` + "`" + `\": \"+71112223344\"` + "`" + ` - set a new phone number in the database\n3. **Passed null**: ` + "`" + `\"phone_number` + "`" + `\": \"null\"` + "`" + ` - clear a field in the database (set to NULL)\nRestrictions: ` + "`" + `full_name ` + "`" + ` can't be null",
                 "consumes": [
                     "application/json"
@@ -542,6 +884,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "User not found",
                         "schema": {
@@ -565,6 +919,31 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_daf32_golang-todoapp_internal_core_transport_http_dto.UserDTOResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "ivanivanov@example.ex"
+                },
+                "full_name": {
+                    "type": "string",
+                    "example": "Ivan Ivanov"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+79998887766"
+                },
+                "version": {
+                    "type": "integer",
+                    "example": 3
+                }
+            }
+        },
         "github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -575,6 +954,136 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "short human-readable message"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "full_name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 5,
+                    "example": "ivanivanov@example.ex"
+                },
+                "full_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3,
+                    "example": "Ivan Ivanov"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 6,
+                    "example": "password_example"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "maxLength": 15,
+                    "minLength": 10,
+                    "example": "+79998887766"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.CreateUserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "ivanivanov@example.ex"
+                },
+                "full_name": {
+                    "type": "string",
+                    "example": "Ivan Ivanov"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+79998887766"
+                },
+                "version": {
+                    "type": "integer",
+                    "example": 3
+                }
+            }
+        },
+        "internal_features_auth_transport_http.LoginUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 5,
+                    "example": "jebron.lames@goat.forever"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 6,
+                    "example": "some_password"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.LoginUserResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "acess_token"
+                },
+                "refresh_token": {
+                    "type": "string",
+                    "example": "refresh_token"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.LogoutUserRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "example": "refresh_token"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.RefreshRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "example": "refresh_token"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.RefreshResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "access_token"
                 }
             }
         },
@@ -602,14 +1111,9 @@ const docTemplate = `{
         "internal_features_tasks_transport_http.CreateTaskRequest": {
             "type": "object",
             "required": [
-                "author_user_id",
                 "title"
             ],
             "properties": {
-                "author_user_id": {
-                    "type": "integer",
-                    "example": 5
-                },
                 "description": {
                     "type": "string",
                     "maxLength": 1000,
@@ -788,50 +1292,13 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_features_users_transport_http.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "full_name"
-            ],
-            "properties": {
-                "full_name": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 3,
-                    "example": "Ivan Ivanov"
-                },
-                "phone_number": {
-                    "type": "string",
-                    "maxLength": 15,
-                    "minLength": 10,
-                    "example": "+79998887766"
-                }
-            }
-        },
-        "internal_features_users_transport_http.CreateUserResponse": {
-            "type": "object",
-            "properties": {
-                "full_name": {
-                    "type": "string",
-                    "example": "Ivan Ivanov"
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 10
-                },
-                "phone_number": {
-                    "type": "string",
-                    "example": "+79998887766"
-                },
-                "version": {
-                    "type": "integer",
-                    "example": 3
-                }
-            }
-        },
         "internal_features_users_transport_http.GetUserResponse": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "ivanivanov@example.ex"
+                },
                 "full_name": {
                     "type": "string",
                     "example": "Ivan Ivanov"
@@ -853,6 +1320,10 @@ const docTemplate = `{
         "internal_features_users_transport_http.PatchUserRequest": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "jebron.lames@goat.forever"
+                },
                 "full_name": {
                     "type": "string",
                     "example": "Jebron Lames"
@@ -866,6 +1337,10 @@ const docTemplate = `{
         "internal_features_users_transport_http.PatchUserResponse": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "ivanivanov@example.ex"
+                },
                 "full_name": {
                     "type": "string",
                     "example": "Ivan Ivanov"
@@ -883,27 +1358,14 @@ const docTemplate = `{
                     "example": 3
                 }
             }
-        },
-        "internal_features_users_transport_http.UserDTOResponse": {
-            "type": "object",
-            "properties": {
-                "full_name": {
-                    "type": "string",
-                    "example": "Ivan Ivanov"
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 10
-                },
-                "phone_number": {
-                    "type": "string",
-                    "example": "+79998887766"
-                },
-                "version": {
-                    "type": "integer",
-                    "example": 3
-                }
-            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Type \"Bearer {access_token}\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

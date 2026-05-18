@@ -48,7 +48,10 @@ tmp/
 temp/
 out
 
-CLAUDE.md
-.claude
-MEMORY.md
 AGENTS.md
+CLAUDE.md
+
+/frontend/node_modules
+/frontend/dist
+vite.config.js.timestamp
+.npm

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/daf32/golang-todoapp/internal/core/domain"
+	core_http_middleware "github.com/daf32/golang-todoapp/internal/core/transport/http/middleware"
 	core_http_server "github.com/daf32/golang-todoapp/internal/core/transport/http/server"
 )
 
@@ -13,11 +14,6 @@ type UsersHTTPHanlder struct {
 }
 
 type UsersService interface {
-	CreateUser(
-		ctx context.Context,
-		user domain.User,
-	) (domain.User, error)
-
 	GetUsers(
 		ctx context.Context,
 		limit *int,
@@ -26,6 +22,7 @@ type UsersService interface {
 
 	GetUser(
 		ctx context.Context,
+		actor domain.Actor,
 		id int,
 	) (domain.User, error)
 
@@ -36,30 +33,29 @@ type UsersService interface {
 
 	PatchUser(
 		ctx context.Context,
+		actor domain.Actor,
 		id int,
 		patch domain.UserPatch,
 	) (domain.User, error)
 }
 
 func NewUsersHTTPHanlder(
-	usersServiece UsersService,
+	usersService UsersService,
 ) *UsersHTTPHanlder {
 	return &UsersHTTPHanlder{
-		userService: usersServiece,
+		userService: usersService,
 	}
 }
 
 func (h *UsersHTTPHanlder) Routes() []core_http_server.Route {
 	return []core_http_server.Route{
 		{
-			Method:  http.MethodPost,
-			Path:    "/users",
-			Handler: h.CreateUser,
-		},
-		{
 			Method:  http.MethodGet,
 			Path:    "/users",
 			Handler: h.GetUsers,
+			Middleware: []core_http_middleware.Middleware{
+				core_http_middleware.RequireRole(domain.UserRoleAdmin),
+			},
 			/*
 				 	Example of usage Middleware on separate Route
 
@@ -77,6 +73,9 @@ func (h *UsersHTTPHanlder) Routes() []core_http_server.Route {
 			Method:  http.MethodDelete,
 			Path:    "/users/{id}",
 			Handler: h.DeleteUser,
+			Middleware: []core_http_middleware.Middleware{
+				core_http_middleware.RequireRole(domain.UserRoleAdmin),
+			},
 		},
 		{
 			Method:  http.MethodPatch,

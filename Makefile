@@ -14,13 +14,13 @@ env-down:
 	@docker compose down todoapp-postgres
 
 env-cleanup:
-	@read -p "Очистить все volume файлы окружения? Опастность утери данных. [y/N]: " ans; \
+	@read -p "Clear all volume files in the environment? Risk of data loss. [y/N]: " ans; \
 	if [ "$$ans" = "y" ]; then \
 		docker compose down todoapp-postgres port-forwarder && \
 		rm -rf ${PROJECT_ROOT}/out/pgdata && \
-		echo "Файлы окружения очищены"; \
+		echo "Environment files have been cleared"; \
 	else \
-		echo "Очиска окружения отменена"; \
+		echo "Environment cleanup cancelled"; \
 	fi
 
 env-port-forward:
@@ -30,12 +30,12 @@ env-port-close:
 	@docker compose down port-forwarder
 
 logs-cleanup:
-	@read -p "Очистить все log файлы? Опастность утери логов. [y/N]: " ans; \
+	@read -p "Clear all log files? Risk of losing logs. [y/N]: " ans; \
 	if [ "$$ans" = "y" ]; then \
 		rm -rf ${PROJECT_ROOT}/out/logs && \
-		echo "Файлы логов очищены"; \
+		echo "Logs files have been cleared"; \
 	else \
-		echo "Очиска логов отменена"; \
+		echo "Logs files cleanup cancelled"; \
 	fi
 
 # ============
@@ -44,7 +44,7 @@ logs-cleanup:
 
 migrate-create:
 	@if [ -z "$(seq)" ]; then \
-		echo "Отсуствует необходимый параметр seq. Пример: make migrate-create seq=init"; \
+		echo "The required seq parameter is missing. Example: make migrate-create seq=init"; \
 		exit 1; \
 	fi; \
 	docker compose run --rm todoapp-postgres-migrate \
@@ -55,7 +55,7 @@ migrate-create:
 
 migrate-action:
 	@if [ -z "$(action)" ]; then \
-		echo "Отсуствует необходимый параметр action. Пример: make migrate-action action=up"; \
+		echo "The required action parameter is missing. Example: make migrate-action action=up"; \
 		exit 1; \
 	fi; \
 	docker compose run --rm todoapp-postgres-migrate \
@@ -68,6 +68,26 @@ migrate-up:
 
 migrate-down:
 	@make migrate-action action=down
+
+admin-promote:
+	@if [ -z "$(email)" ]; then \
+		echo "The required email parameter is missing. Example: make admin-promote email=ivan@example.com"; \
+		exit 1; \
+	fi; \
+	result=$$(docker exec \
+		-e PGPASSWORD=${POSTGRES_PASSWORD} \
+		todoapp-env-postgres \
+		psql \
+			-U ${POSTGRES_USER} \
+			-d ${POSTGRES_DB} \
+			-tA \
+			-v ON_ERROR_STOP=1 \
+			-c "UPDATE todoapp.users SET role = 'admin' WHERE email = '$(email)' RETURNING email;"); \
+	if [ -z "$$result" ]; then \
+		echo "User with email $(email) not found"; \
+		exit 1; \
+	fi; \
+	echo "Promoted $$result to admin";
 
 # ============
 # Utils

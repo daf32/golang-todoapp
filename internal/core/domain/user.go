@@ -7,12 +7,27 @@ import (
 	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
 )
 
+var (
+	emailFormatRE = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	phoneNumberRE = regexp.MustCompile(`^\+[0-9]+$`)
+)
+
+type UserRole string
+
+const (
+	UserRoleUser  UserRole = "user"
+	UserRoleAdmin UserRole = "admin"
+)
+
 type User struct {
 	ID      int
 	Version int
 
-	FullName    string
-	PhoneNumber *string
+	FullName     string
+	PhoneNumber  *string
+	Email        string
+	PasswordHash string
+	Role         UserRole
 }
 
 func NewUser(
@@ -20,24 +35,35 @@ func NewUser(
 	version int,
 	fullName string,
 	phoneNumber *string,
+	email string,
+	passwordHash string,
+	role UserRole,
 ) User {
 	return User{
-		ID:          id,
-		Version:     version,
-		FullName:    fullName,
-		PhoneNumber: phoneNumber,
+		ID:           id,
+		Version:      version,
+		FullName:     fullName,
+		PhoneNumber:  phoneNumber,
+		Email:        email,
+		PasswordHash: passwordHash,
+		Role:         role,
 	}
 }
 
 func NewUserUninitialized(
 	fullName string,
 	phoneNumber *string,
+	email string,
+	role UserRole,
 ) User {
 	return NewUser(
 		UninitializedID,
 		UninitializedVersion,
 		fullName,
 		phoneNumber,
+		email,
+		UninitializedPassowrd,
+		role,
 	)
 }
 
@@ -61,14 +87,42 @@ func (u *User) Validate() error {
 			)
 		}
 
-		re := regexp.MustCompile(`^\+[0-9]+$`)
-
-		if !re.MatchString(*u.PhoneNumber) {
+		if !phoneNumberRE.MatchString(*u.PhoneNumber) {
 			return fmt.Errorf(
 				"invalid `PhoneNumber` format: %w",
 				core_errors.ErrInvalidArgument,
 			)
 		}
+	}
+
+	emailLen := len([]rune(u.Email))
+	if emailLen < 5 || emailLen > 255 {
+		return fmt.Errorf(
+			"invalid `Email` len: %d: %w",
+			emailLen,
+			core_errors.ErrInvalidArgument,
+		)
+	}
+
+	if !emailFormatRE.MatchString(u.Email) {
+		return fmt.Errorf(
+			"invalid `Email` format: %w",
+			core_errors.ErrInvalidArgument,
+		)
+	}
+
+	if len(u.PasswordHash) == 0 {
+		return fmt.Errorf(
+			"empty `PasswordHash`: %w",
+			core_errors.ErrInvalidArgument,
+		)
+	}
+
+	if u.Role != UserRoleUser && u.Role != UserRoleAdmin {
+		return fmt.Errorf(
+			"invalid `Role`: %w",
+			core_errors.ErrInvalidArgument,
+		)
 	}
 
 	return nil
@@ -77,15 +131,18 @@ func (u *User) Validate() error {
 type UserPatch struct {
 	FullName    Nullable[string]
 	PhoneNumber Nullable[string]
+	Email       Nullable[string]
 }
 
 func NewUserPatch(
 	fullName Nullable[string],
 	phoneNumber Nullable[string],
+	email Nullable[string],
 ) UserPatch {
 	return UserPatch{
 		FullName:    fullName,
 		PhoneNumber: phoneNumber,
+		Email:       email,
 	}
 }
 
@@ -95,6 +152,30 @@ func (p *UserPatch) Validate() error {
 			"`FullName` can't be patched to NULL: %w",
 			core_errors.ErrInvalidArgument,
 		)
+	}
+	if p.Email.Set && p.Email.Value == nil {
+		return fmt.Errorf(
+			"`Email` can't be patched to NULL: %w",
+			core_errors.ErrInvalidArgument,
+		)
+	}
+
+	if p.Email.Set && p.Email.Value != nil {
+		emailLen := len([]rune(*p.Email.Value))
+		if emailLen < 5 || emailLen > 255 {
+			return fmt.Errorf(
+				"invalid patched `Email` len: %d: %w",
+				emailLen,
+				core_errors.ErrInvalidArgument,
+			)
+		}
+
+		if !emailFormatRE.MatchString(*p.Email.Value) {
+			return fmt.Errorf(
+				"invalid patched `Email` format: %w",
+				core_errors.ErrInvalidArgument,
+			)
+		}
 	}
 
 	return nil
@@ -116,6 +197,10 @@ func (u *User) ApplyPatch(patch UserPatch) error {
 
 	if patch.PhoneNumber.Set {
 		tmp.PhoneNumber = patch.PhoneNumber.Value
+	}
+
+	if patch.Email.Set {
+		tmp.Email = *patch.Email.Value
 	}
 
 	if err := tmp.Validate(); err != nil {

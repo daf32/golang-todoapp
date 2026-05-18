@@ -5,21 +5,25 @@ import (
 	"net/http"
 
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
+	core_dto "github.com/daf32/golang-todoapp/internal/core/transport/http/dto"
 	core_http_request "github.com/daf32/golang-todoapp/internal/core/transport/http/request"
 	core_http_response "github.com/daf32/golang-todoapp/internal/core/transport/http/response"
 )
 
-type GetUsersResponse []UserDTOResponse
+type GetUsersResponse []core_dto.UserDTOResponse
 
 // GetUsers 	 godoc
 // @Summary 	 Users list
 // @Description  View users list with optional pagination
 // @Tags 		 users
 // @Produce		 json
+// @Security 	 BearerAuth
 // @Param 		 limit query int false "Users page size"
 // @Param 		 offset query int false "Users page shifting"
 // @Success 	 200 {object} GetUsersResponse "Seccessfull get a list of users"
 // @Failure 	 400 {object} core_http_response.ErrorResponse  "Bad request"
+// @Failure 	 401 {object} core_http_response.ErrorResponse "Unauthorized"
+// @Failure 	 403 {object} core_http_response.ErrorResponse "Forbidden"
 // @Failure 	 500 {object} core_http_response.ErrorResponse "Internal server error"
 // @Router 	 	 /users [get]
 func (h *UsersHTTPHanlder) GetUsers(rw http.ResponseWriter, r *http.Request) {
@@ -47,7 +51,7 @@ func (h *UsersHTTPHanlder) GetUsers(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := GetUsersResponse(usersDTOFromDomains(userDomains))
+	response := GetUsersResponse(core_dto.UsersDTOFromDomains(userDomains))
 
 	responseHandler.JSONResponse(response, http.StatusOK)
 }
