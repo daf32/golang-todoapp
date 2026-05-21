@@ -12,7 +12,7 @@ func (s *AuthService) LogoutUser(
 	userID int,
 	refreshTokenString string,
 ) error {
-	refreshToken, err := s.refreshTokenRepository.GetRefreshToken(ctx, refreshTokenString)
+	refreshToken, err := s.authRepository.GetRefreshToken(ctx, refreshTokenString)
 	if err != nil {
 		return fmt.Errorf("get refresh token: %w", err)
 	}
@@ -25,7 +25,7 @@ func (s *AuthService) LogoutUser(
 		)
 	}
 
-	if err := s.refreshTokenRepository.RevokeRefreshToken(ctx, refreshTokenString); err != nil {
+	if err := s.authRepository.RevokeRefreshToken(ctx, refreshTokenString); err != nil {
 		return fmt.Errorf("revoke refresh token: %w", err)
 	}
 

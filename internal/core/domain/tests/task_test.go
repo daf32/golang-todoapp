@@ -1,9 +1,10 @@
-package domain
+package domain_test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/daf32/golang-todoapp/internal/core/domain"
 	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -28,12 +29,12 @@ var (
 func TestTaskValidate(t *testing.T) {
 	testCases := []struct {
 		name    string
-		task    Task
+		task    domain.Task
 		wantErr error
 	}{
 		{
 			name: "success validation",
-			task: Task{
+			task: domain.Task{
 				Title:        "test_task",
 				Description:  nil,
 				Completed:    false,
@@ -44,7 +45,7 @@ func TestTaskValidate(t *testing.T) {
 		},
 		{
 			name: "reject empty title",
-			task: Task{
+			task: domain.Task{
 				Title:        "",
 				Description:  nil,
 				Completed:    false,
@@ -56,7 +57,7 @@ func TestTaskValidate(t *testing.T) {
 		},
 		{
 			name: "reject more than 100 title",
-			task: Task{
+			task: domain.Task{
 				Title:        "ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
 				Description:  nil,
 				Completed:    false,
@@ -68,7 +69,7 @@ func TestTaskValidate(t *testing.T) {
 		},
 		{
 			name: "reject when CompletedAt is nil if Completed is true",
-			task: Task{
+			task: domain.Task{
 				Title:        "test_task",
 				Description:  nil,
 				Completed:    true,
@@ -80,7 +81,7 @@ func TestTaskValidate(t *testing.T) {
 		},
 		{
 			name: "reject when CompletedAt before CreatedAt",
-			task: Task{
+			task: domain.Task{
 				Title:        "test_task",
 				Description:  nil,
 				Completed:    true,
@@ -92,7 +93,7 @@ func TestTaskValidate(t *testing.T) {
 		},
 		{
 			name: "reject when Completed is false, but CompletedAt is not nil",
-			task: Task{
+			task: domain.Task{
 				Title:        "test_task",
 				Description:  nil,
 				Completed:    false,
@@ -119,7 +120,7 @@ func TestTaskValidate(t *testing.T) {
 }
 
 func TestTaskApplyPatch(t *testing.T) {
-	task := Task{
+	task := domain.Task{
 		Title:       "test_task",
 		Description: nil,
 		Completed:   false,
@@ -141,14 +142,14 @@ func TestTaskApplyPatch(t *testing.T) {
 
 	testCases := []struct {
 		name              string
-		patch             TaskPatch
+		patch             domain.TaskPatch
 		wantValidateErr   error
 		wantApplyPatchErr error
 	}{
 		{
 			name: "success apply patch",
-			patch: TaskPatch{
-				Title: Nullable[string]{
+			patch: domain.TaskPatch{
+				Title: domain.Nullable[string]{
 					Value: &newTitle,
 					Set:   true,
 				},
@@ -156,8 +157,8 @@ func TestTaskApplyPatch(t *testing.T) {
 		},
 		{
 			name: "reject validate patch: completed is set and value is nil",
-			patch: TaskPatch{
-				Completed: Nullable[bool]{
+			patch: domain.TaskPatch{
+				Completed: domain.Nullable[bool]{
 					Value: nil,
 					Set:   true,
 				},
@@ -166,8 +167,8 @@ func TestTaskApplyPatch(t *testing.T) {
 		},
 		{
 			name: "reject validate patch: title is set and value is nil",
-			patch: TaskPatch{
-				Title: Nullable[string]{
+			patch: domain.TaskPatch{
+				Title: domain.Nullable[string]{
 					Value: nil,
 					Set:   true,
 				},

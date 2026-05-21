@@ -40,4 +40,10 @@ type UsersRepository interface {
 		id int,
 		user domain.User,
 	) (domain.User, error)
+
+	ChangeUserPassword(
+		ctx context.Context,
+		user domain.User,
+		newPasswordHash string,
+	) error
 }

@@ -8,8 +8,8 @@ import (
 )
 
 type Config struct {
-	Addr            string        `envconfig:"ADDR" required:"true"`
-	ShutdownTimeout time.Duration `envconfig:"SHUTDOWN_TIMEOUT" default:"30s"`
+	Addr            string        `envconfig:"ADDR"                 required:"true"`
+	ShutdownTimeout time.Duration `envconfig:"SHUTDOWN_TIMEOUT"     default:"30s"`
 	AllowedOrigins  []string      `envconfig:"HTTP_ALLOWED_ORIGINS" required:"true"`
 }
 

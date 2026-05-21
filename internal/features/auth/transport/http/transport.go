@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	"github.com/daf32/golang-todoapp/internal/core/domain"
 	core_http_middleware "github.com/daf32/golang-todoapp/internal/core/transport/http/middleware"
 	core_http_server "github.com/daf32/golang-todoapp/internal/core/transport/http/server"
@@ -12,20 +13,23 @@ import (
 
 type AuthHTTPHandler struct {
 	authService AuthService
+	apiVersion  core_http_server.ApiVersion
+	appBaseURL  string
 }
 
 type AuthService interface {
 	CreateUser(
 		ctx context.Context,
 		userDomain domain.User,
-		plainPassword string,
+		plainPassword core_auth.PlainPassword,
+		confirmationURL string,
 	) (domain.User, error)
 
 	LoginUser(
 		ctx context.Context,
 		email string,
-		password string,
-	) (string, domain.RefreshToken, error)
+		password core_auth.PlainPassword,
+	) (string, core_auth.RefreshToken, error)
 
 	ValidateToken(
 		tokenString string,
@@ -41,15 +45,26 @@ type AuthService interface {
 		userID int,
 		refreshTokenString string,
 	) error
+
+	ConfirmEmail(
+		ctx context.Context,
+		token string,
+	) error
 }
 
 func NewAuthHTTPHandler(
 	authService AuthService,
+	apiVersion core_http_server.ApiVersion,
+	appBaseURL string,
 ) *AuthHTTPHandler {
 	return &AuthHTTPHandler{
 		authService: authService,
+		apiVersion:  apiVersion,
+		appBaseURL:  appBaseURL,
 	}
 }
+
+const confirmEmailPath = "/auth/confirm-email"
 
 func (h *AuthHTTPHandler) Routes() []core_http_server.Route {
 	return []core_http_server.Route{
@@ -75,6 +90,11 @@ func (h *AuthHTTPHandler) Routes() []core_http_server.Route {
 			Middleware: []core_http_middleware.Middleware{
 				core_http_middleware.Auth(h.authService),
 			},
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    confirmEmailPath,
+			Handler: h.ConfirmEmail,
 		},
 	}
 }

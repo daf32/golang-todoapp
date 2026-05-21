@@ -1,13 +1,8 @@
--- Email/password auth from a clean slate: drop legacy users and dependent rows (e.g. tasks).
-TRUNCATE TABLE todoapp.users RESTART IDENTITY CASCADE;
+ALTER TABLE todoapp.users
+    ADD COLUMN password_hash TEXT NOT NULL DEFAULT '';
 
 ALTER TABLE todoapp.users
-    ADD COLUMN email VARCHAR(255) NOT NULL
-        CHECK (
-            char_length(email) BETWEEN 5 AND 255
-            AND email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        ),
-    ADD COLUMN password_hash TEXT NOT NULL;
+    ALTER COLUMN password_hash DROP DEFAULT;
 
 CREATE UNIQUE INDEX users_email_unique
     ON todoapp.users (email);

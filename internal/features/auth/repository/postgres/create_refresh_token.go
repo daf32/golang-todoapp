@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/daf32/golang-todoapp/internal/core/domain"
+	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	"github.com/google/uuid"
 )
 
-func (r *RefreshTokenRepository) CreateRefreshToken(
+func (r *AuthRepository) CreateRefreshToken(
 	ctx context.Context,
 	userID int,
 	ttl time.Duration,
-) (domain.RefreshToken, error) {
+) (core_auth.RefreshToken, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
 
@@ -34,7 +34,7 @@ func (r *RefreshTokenRepository) CreateRefreshToken(
         VALUES ($1, $2, $3, $4, $5, $6)
     `
 
-	_, err := r.pool.Exec(
+	if _, err := r.pool.Exec(
 		ctx,
 		query,
 		token.ID,
@@ -43,17 +43,16 @@ func (r *RefreshTokenRepository) CreateRefreshToken(
 		token.ExpiresAt,
 		token.CreatedAt,
 		token.Revoked,
-	)
-	if err != nil {
-		return domain.RefreshToken{}, fmt.Errorf("scan error: %w", err)
+	); err != nil {
+		return core_auth.RefreshToken{}, fmt.Errorf("scan error: %w", err)
 	}
 
-	return domain.NewRefreshToken(
+	return core_auth.NewRefreshToken(
 		tokenID,
 		token.UserID,
 		token.Token,
 		token.ExpiresAt,
 		token.CreatedAt,
 		token.Revoked,
-	), err
+	), nil
 }

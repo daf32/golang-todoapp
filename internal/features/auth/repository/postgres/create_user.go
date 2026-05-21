@@ -11,7 +11,7 @@ import (
 	core_postgres_pool "github.com/daf32/golang-todoapp/internal/core/repository/postgres/pool"
 )
 
-func (r *RefreshTokenRepository) CreateUser(
+func (r *AuthRepository) CreateUser(
 	ctx context.Context,
 	user domain.User,
 ) (domain.User, error) {
@@ -19,9 +19,9 @@ func (r *RefreshTokenRepository) CreateUser(
 	defer cancel()
 
 	query := `
-	INSERT INTO todoapp.users (full_name, phone_number, email, password_hash, role)
-	VALUES ($1, $2, $3, $4, $5)
-	RETURNING id, version, full_name, phone_number, email, password_hash, role;
+	INSERT INTO todoapp.users (full_name, phone_number, email, password_hash, role, email_verified)
+	VALUES ($1, $2, $3, $4, $5, $6)
+	RETURNING id, version, full_name, phone_number, email, password_hash, role, email_verified;
 	`
 
 	row := r.pool.QueryRow(
@@ -32,6 +32,7 @@ func (r *RefreshTokenRepository) CreateUser(
 		user.Email,
 		user.PasswordHash,
 		user.Role,
+		user.EmailVerified,
 	)
 
 	var userModel core_models.UserModel
@@ -43,6 +44,7 @@ func (r *RefreshTokenRepository) CreateUser(
 		&userModel.Email,
 		&userModel.PasswordHash,
 		&userModel.Role,
+		&userModel.EmailVerified,
 	)
 	if err != nil {
 		if errors.Is(err, core_postgres_pool.ErrUniqueViolation) {
@@ -63,5 +65,6 @@ func (r *RefreshTokenRepository) CreateUser(
 		userModel.Email,
 		userModel.PasswordHash,
 		userModel.Role,
+		user.EmailVerified,
 	), nil
 }

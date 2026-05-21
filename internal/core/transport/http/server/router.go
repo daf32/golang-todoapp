@@ -9,6 +9,10 @@ import (
 
 type ApiVersion string
 
+func (v ApiVersion) Path(path string) string {
+	return "/api/" + string(v) + path
+}
+
 var (
 	ApiVersion1 = ApiVersion("v1")
 	ApiVersion2 = ApiVersion("v2")

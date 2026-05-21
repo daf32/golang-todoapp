@@ -3,6 +3,7 @@ package auth_transport_http
 import (
 	"net/http"
 
+	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	"github.com/daf32/golang-todoapp/internal/core/domain"
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
 	core_dto "github.com/daf32/golang-todoapp/internal/core/transport/http/dto"
@@ -14,7 +15,7 @@ type CreateUserRequest struct {
 	FullName    string  `json:"full_name"     validate:"required,min=3,max=100"                 example:"Ivan Ivanov"`
 	PhoneNumber *string `json:"phone_number"  validate:"omitempty,min=10,max=15,startswith=+"   example:"+79998887766"`
 	Email       string  `json:"email"         validate:"email,required,min=5,max=255"           example:"ivanivanov@example.ex"`
-	Password    string  `json:"password"      validate:"required,min=6,max=100"                 example:"password_example"`
+	Password    string  `json:"password"      validate:"required,min=8,max=72"                 example:"password_example"`
 }
 
 type CreateUserResponse core_dto.UserDTOResponse
@@ -45,9 +46,16 @@ func (h *AuthHTTPHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	confirmationURL := h.appBaseURL + h.apiVersion.Path(confirmEmailPath) + "?token="
+
 	userDomain := domainFromDTO(request)
 
-	userDomain, err := h.authService.CreateUser(ctx, userDomain, request.Password)
+	userDomain, err := h.authService.CreateUser(
+		ctx,
+		userDomain,
+		core_auth.PlainPassword(request.Password),
+		confirmationURL,
+	)
 	if err != nil {
 		responseHandler.ErrorResponse(
 			err,

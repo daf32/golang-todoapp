@@ -37,7 +37,7 @@ func NewHTTPServer(
 
 func (s *HTTPServer) RegisterAPIRouters(routers ...*ApiVersionRouter) {
 	for _, router := range routers {
-		prefix := "/api/" + string(router.apiVersion)
+		prefix := router.apiVersion.Path("")
 
 		s.mux.Handle(
 			prefix+"/",
@@ -90,7 +90,6 @@ func (s *HTTPServer) RegisterSPA(spaPath string) {
 		fileServer.ServeHTTP(w, r)
 	}))
 }
-
 
 func (s *HTTPServer) Run(ctx context.Context) error {
 	mux := core_http_middleware.ChainMiddleware(s.mux, s.middleware...)

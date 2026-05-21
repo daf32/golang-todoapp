@@ -3,22 +3,23 @@ package auth_service
 import (
 	"context"
 	"fmt"
+	"time"
 
-	core_auth "github.com/daf32/golang-todoapp/internal/core/auth/password"
+	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	"github.com/daf32/golang-todoapp/internal/core/domain"
-	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
 )
 
 func (s *AuthService) CreateUser(
 	ctx context.Context,
 	user domain.User,
-	plainPassword string,
+	plainPassword core_auth.PlainPassword,
+	confirmationURL string,
 ) (domain.User, error) {
-	if plainPassword == "" {
-		return domain.User{}, fmt.Errorf("password required: %w", core_errors.ErrInvalidArgument)
+	if err := plainPassword.Validate(); err != nil {
+		return domain.User{}, fmt.Errorf("validate password: %w", err)
 	}
 
-	hashedPassword, err := core_auth.HashPassword(plainPassword)
+	hashedPassword, err := plainPassword.Hash()
 	if err != nil {
 		return domain.User{}, fmt.Errorf("generate hash password: %w", err)
 	}
@@ -29,10 +30,35 @@ func (s *AuthService) CreateUser(
 		return domain.User{}, fmt.Errorf("validate user domain: %w", err)
 	}
 
-	user, err = s.refreshTokenRepository.CreateUser(ctx, user)
+	user, err = s.authRepository.CreateUser(ctx, user)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("create user: %w", err)
 	}
 
+	go s.sendConfirmationEmail(user, confirmationURL)
+
 	return user, nil
+}
+
+func (s *AuthService) sendConfirmationEmail(
+	user domain.User,
+	confirmationURL string,
+) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	token, err := s.authRepository.CreateEmailConfirmationToken(ctx, user.ID, s.emailConfirmationTokenTTL)
+	if err != nil {
+		return
+	}
+
+	link := confirmationURL + token.Token
+
+	body := fmt.Sprintf(
+		"Hi %s,\n\nPlease confirm your email by clicking the link below:\n\n%s\n\nThe link expires in 24 hours.",
+		user.FullName,
+		link,
+	)
+
+	_ = s.mailer.SendEmail(user.Email, "Confirm your email", body)
 }

@@ -31,3 +31,10 @@ packages:
   github.com/daf32/golang-todoapp/internal/features/users/service:
     interfaces:
       UsersRepository:
+  github.com/daf32/golang-todoapp/internal/features/auth/service:
+    interfaces:
+      AuthRepository:
+  github.com/daf32/golang-todoapp/internal/core/mailer:
+    interfaces:
+      Mailer:
+

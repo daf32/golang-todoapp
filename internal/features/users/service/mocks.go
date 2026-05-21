@@ -38,6 +38,69 @@ func (_m *MockUsersRepository) EXPECT() *MockUsersRepository_Expecter {
 	return &MockUsersRepository_Expecter{mock: &_m.Mock}
 }
 
+// ChangeUserPassword provides a mock function for the type MockUsersRepository
+func (_mock *MockUsersRepository) ChangeUserPassword(ctx context.Context, user domain.User, newPasswordHash string) error {
+	ret := _mock.Called(ctx, user, newPasswordHash)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ChangeUserPassword")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.User, string) error); ok {
+		r0 = returnFunc(ctx, user, newPasswordHash)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockUsersRepository_ChangeUserPassword_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ChangeUserPassword'
+type MockUsersRepository_ChangeUserPassword_Call struct {
+	*mock.Call
+}
+
+// ChangeUserPassword is a helper method to define mock.On call
+//   - ctx context.Context
+//   - user domain.User
+//   - newPasswordHash string
+func (_e *MockUsersRepository_Expecter) ChangeUserPassword(ctx interface{}, user interface{}, newPasswordHash interface{}) *MockUsersRepository_ChangeUserPassword_Call {
+	return &MockUsersRepository_ChangeUserPassword_Call{Call: _e.mock.On("ChangeUserPassword", ctx, user, newPasswordHash)}
+}
+
+func (_c *MockUsersRepository_ChangeUserPassword_Call) Run(run func(ctx context.Context, user domain.User, newPasswordHash string)) *MockUsersRepository_ChangeUserPassword_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 domain.User
+		if args[1] != nil {
+			arg1 = args[1].(domain.User)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockUsersRepository_ChangeUserPassword_Call) Return(err error) *MockUsersRepository_ChangeUserPassword_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockUsersRepository_ChangeUserPassword_Call) RunAndReturn(run func(ctx context.Context, user domain.User, newPasswordHash string) error) *MockUsersRepository_ChangeUserPassword_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteUser provides a mock function for the type MockUsersRepository
 func (_mock *MockUsersRepository) DeleteUser(ctx context.Context, id int) error {
 	ret := _mock.Called(ctx, id)

@@ -12,7 +12,7 @@ func (s *AuthService) RefreshAccessToken(
 	ctx context.Context,
 	refreshTokenString string,
 ) (string, error) {
-	token, err := s.refreshTokenRepository.GetRefreshToken(ctx, refreshTokenString)
+	token, err := s.authRepository.GetRefreshToken(ctx, refreshTokenString)
 	if err != nil {
 		return "", fmt.Errorf("get refresh token='%v': %w", token, err)
 	}

@@ -8,8 +8,10 @@ import (
 	"syscall"
 	"time"
 
+	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	core_config "github.com/daf32/golang-todoapp/internal/core/config"
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
+	core_mailer "github.com/daf32/golang-todoapp/internal/core/mailer"
 	core_pgx_pool "github.com/daf32/golang-todoapp/internal/core/repository/postgres/pool/pgx"
 	core_http_middleware "github.com/daf32/golang-todoapp/internal/core/transport/http/middleware"
 	core_http_server "github.com/daf32/golang-todoapp/internal/core/transport/http/server"
@@ -51,6 +53,8 @@ func WithMiddleware(
 // @name Authorization
 // @description Type "Bearer {access_token}"
 func main() {
+	apiVersion := core_http_server.ApiVersion1
+	
 	cfg := core_config.NewConfigMust()
 	time.Local = cfg.TimeZone
 
@@ -95,16 +99,25 @@ func main() {
 	statisticsService := statistics_service.NewStatisticsService(statisticsRepository)
 	statisticsTransportHTTP := statistics_transport_http.NewStatisticsHTTPHandler(statisticsService)
 
+	authConfig := core_auth.NewConfigMust()
+	smtpConfig := core_mailer.NewConfigMust()
+	mailer := core_mailer.NewSMTPMailer(smtpConfig)
 	logger.Debug("initializing feature", zap.String("feature", "auth"))
-	refreshTokenRepository := auth_postgres_repository.NewRefreshTokenRepository(pool)
+	authRepository := auth_postgres_repository.NewAuthRepository(pool)
 	authService := auth_service.NewAuthService(
-		refreshTokenRepository,
-		*usersRepository,
-		cfg.JWTSecret,
-		cfg.AccessTokenExpiry,
-		cfg.RefreshTokenExpiry,
+		authRepository,
+		usersRepository,
+		mailer,
+		authConfig.JWTSecret,
+		authConfig.AccessTokenExpiry,
+		authConfig.RefreshTokenExpiry,
+		authConfig.EmailConfirmationTokenExpiry,
 	)
-	authTransportHTTP := auth_transport_http.NewAuthHTTPHandler(authService)
+	authTransportHTTP := auth_transport_http.NewAuthHTTPHandler(
+		authService,
+		apiVersion,
+		cfg.AppBaseURL,
+	)
 
 	logger.Debug("initializing HTTP server")
 	httpConfig := core_http_server.NewConfigMust()
@@ -120,7 +133,7 @@ func main() {
 
 	authMW := core_http_middleware.Auth(authService)
 
-	apiVersionRouterV1 := core_http_server.NewApiVersionRouter(core_http_server.ApiVersion1)
+	apiVersionRouterV1 := core_http_server.NewApiVersionRouter(apiVersion)
 	apiVersionRouterV1.RegisterRoutes(WithMiddleware(usersTransportHTTP.Routes(), authMW)...)
 	apiVersionRouterV1.RegisterRoutes(WithMiddleware(tasksTransportHTTP.Routes(), authMW)...)
 	apiVersionRouterV1.RegisterRoutes(WithMiddleware(statisticsTransportHTTP.Routes(), authMW)...)

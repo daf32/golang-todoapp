@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	"github.com/daf32/golang-todoapp/internal/core/domain"
 	core_http_middleware "github.com/daf32/golang-todoapp/internal/core/transport/http/middleware"
 	core_http_server "github.com/daf32/golang-todoapp/internal/core/transport/http/server"
@@ -37,6 +38,15 @@ type UsersService interface {
 		id int,
 		patch domain.UserPatch,
 	) (domain.User, error)
+
+	ChangeUserPassword(
+		ctx context.Context,
+		actor domain.Actor,
+		userID int,
+		password core_auth.PlainPassword,
+		newPassword core_auth.PlainPassword,
+		confirmPassword core_auth.PlainPassword,
+	) error
 }
 
 func NewUsersHTTPHanlder(
@@ -81,6 +91,11 @@ func (h *UsersHTTPHanlder) Routes() []core_http_server.Route {
 			Method:  http.MethodPatch,
 			Path:    "/users/{id}",
 			Handler: h.PatchUser,
+		},
+		{
+			Method:  http.MethodPatch,
+			Path:    "/users/{id}/password",
+			Handler: h.ChangeUserPassword,
 		},
 	}
 }

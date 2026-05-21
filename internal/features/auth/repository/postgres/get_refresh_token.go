@@ -5,15 +5,15 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/daf32/golang-todoapp/internal/core/domain"
+	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
 	core_postgres_pool "github.com/daf32/golang-todoapp/internal/core/repository/postgres/pool"
 )
 
-func (r *RefreshTokenRepository) GetRefreshToken(
+func (r *AuthRepository) GetRefreshToken(
 	ctx context.Context,
 	tokenString string,
-) (domain.RefreshToken, error) {
+) (core_auth.RefreshToken, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
 
@@ -42,17 +42,17 @@ func (r *RefreshTokenRepository) GetRefreshToken(
 
 	if err != nil {
 		if errors.Is(err, core_postgres_pool.ErrNoRows) {
-			return domain.RefreshToken{}, fmt.Errorf(
+			return core_auth.RefreshToken{}, fmt.Errorf(
 				"refresh token with token=%v: %w",
 				tokenString,
 				core_errors.ErrNotFound,
 			)
 		}
 
-		return domain.RefreshToken{}, fmt.Errorf("scan error: %w", err)
+		return core_auth.RefreshToken{}, fmt.Errorf("scan error: %w", err)
 	}
 
-	return domain.NewRefreshToken(
+	return core_auth.NewRefreshToken(
 		refreshTokenModel.ID,
 		refreshTokenModel.UserID,
 		refreshTokenModel.Token,
