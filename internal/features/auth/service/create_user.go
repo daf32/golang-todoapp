@@ -7,6 +7,7 @@ import (
 
 	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	"github.com/daf32/golang-todoapp/internal/core/domain"
+	"go.uber.org/zap"
 )
 
 func (s *AuthService) CreateUser(
@@ -49,7 +50,11 @@ func (s *AuthService) sendConfirmationEmail(
 
 	token, err := s.authRepository.CreateEmailConfirmationToken(ctx, user.ID, s.emailConfirmationTokenTTL)
 	if err != nil {
-		return
+		s.log.Error(
+			"failed to create email confirmation token",
+			zap.Int("user_id", user.ID),
+			zap.Error(err),
+		)
 	}
 
 	link := confirmationURL + token.Token
@@ -60,5 +65,12 @@ func (s *AuthService) sendConfirmationEmail(
 		link,
 	)
 
-	_ = s.mailer.SendEmail(user.Email, "Confirm your email", body)
+	if err := s.mailer.SendEmail(user.Email, "Confirm your email", body); err != nil {
+		s.log.Error(
+			"failed to send confirmation email",
+			zap.String("email", user.Email),
+			zap.Int("user_id", user.ID),
+			zap.Error(err),
+		)
+	}
 }

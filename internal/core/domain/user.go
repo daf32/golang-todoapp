@@ -3,6 +3,7 @@ package domain
 import (
 	"fmt"
 	"regexp"
+	"time"
 
 	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
 )
@@ -23,12 +24,13 @@ type User struct {
 	ID      int
 	Version int
 
-	FullName      string
-	PhoneNumber   *string
-	Email         string
-	PasswordHash  string
-	Role          UserRole
-	EmailVerified bool
+	FullName        string
+	PhoneNumber     *string
+	Email           string
+	PasswordHash    string
+	Role            UserRole
+	EmailVerified   bool
+	EmailVerifiedAt *time.Time
 }
 
 func NewUser(
@@ -40,16 +42,18 @@ func NewUser(
 	passwordHash string,
 	role UserRole,
 	emailVerified bool,
+	emailVerifiedAt *time.Time,
 ) User {
 	return User{
-		ID:           id,
-		Version:      version,
-		FullName:     fullName,
-		PhoneNumber:  phoneNumber,
-		Email:        email,
-		PasswordHash: passwordHash,
-		Role:         role,
+		ID:            id,
+		Version:       version,
+		FullName:      fullName,
+		PhoneNumber:   phoneNumber,
+		Email:         email,
+		PasswordHash:  passwordHash,
+		Role:          role,
 		EmailVerified: emailVerified,
+		EmailVerifiedAt: emailVerifiedAt,
 	}
 }
 
@@ -68,6 +72,7 @@ func NewUserUninitialized(
 		UninitializedPassowrd,
 		role,
 		UninitializedEmailVerified,
+		nil,
 	)
 }
 

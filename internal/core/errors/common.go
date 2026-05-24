@@ -8,4 +8,5 @@ var (
 	ErrConfict            = errors.New("confict")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrForbidden          = errors.New("forbidden")
+	ErrEmailNotVerified   = errors.New("email not verified")
 )

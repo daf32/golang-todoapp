@@ -19,7 +19,7 @@ func (r *UsersRepository) GetUser(
 	defer cancel()
 
 	query := `
-	SELECT id, version, full_name, phone_number, email, password_hash, role, email_verified FROM todoapp.users
+	SELECT id, version, full_name, phone_number, email, password_hash, role, email_verified, email_verified_at FROM todoapp.users
 	WHERE id=$1;
 	`
 
@@ -39,6 +39,7 @@ func (r *UsersRepository) GetUser(
 		&userModel.PasswordHash,
 		&userModel.Role,
 		&userModel.EmailVerified,
+		&userModel.EmailVerifiedAt,
 	)
 
 	if err != nil {
@@ -62,5 +63,6 @@ func (r *UsersRepository) GetUser(
 		userModel.PasswordHash,
 		userModel.Role,
 		userModel.EmailVerified,
+		userModel.EmailVerifiedAt,
 	), nil
 }

@@ -41,6 +41,14 @@ func (s *AuthService) LoginUser(
 		)
 	}
 
+	if !user.EmailVerified {
+		return "", core_auth.RefreshToken{}, fmt.Errorf(
+			"login rejected for unverified email %s: %w",
+			user.Email,
+			core_errors.ErrEmailNotVerified,
+		)
+	}
+
 	acessToken, err := s.generateAccessToken(user)
 	if err != nil {
 		return "", core_auth.RefreshToken{}, fmt.Errorf(

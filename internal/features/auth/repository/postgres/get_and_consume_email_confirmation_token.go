@@ -66,7 +66,11 @@ func (r *AuthRepository) GetAndConsumeEmailConfirmationToken(
 
 	if _, err := tx.Exec(
 		ctx,
-		`UPDATE todoapp.users SET email_verified=true WHERE id=$1`,
+		`
+		UPDATE todoapp.users 
+		SET email_verified=true, email_verified_at=now()
+		WHERE id=$1
+		`,
 		result.UserID,
 	); err != nil {
 		return domain.EmailConfirmationToken{}, fmt.Errorf("commit tx: %w", err)

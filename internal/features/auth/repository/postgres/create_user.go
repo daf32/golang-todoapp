@@ -19,9 +19,9 @@ func (r *AuthRepository) CreateUser(
 	defer cancel()
 
 	query := `
-	INSERT INTO todoapp.users (full_name, phone_number, email, password_hash, role, email_verified)
-	VALUES ($1, $2, $3, $4, $5, $6)
-	RETURNING id, version, full_name, phone_number, email, password_hash, role, email_verified;
+	INSERT INTO todoapp.users (full_name, phone_number, email, password_hash, role, email_verified, email_verified_at)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)
+	RETURNING id, version, full_name, phone_number, email, password_hash, role, email_verified, email_verified_at;
 	`
 
 	row := r.pool.QueryRow(
@@ -33,6 +33,7 @@ func (r *AuthRepository) CreateUser(
 		user.PasswordHash,
 		user.Role,
 		user.EmailVerified,
+		user.EmailVerifiedAt,
 	)
 
 	var userModel core_models.UserModel
@@ -45,6 +46,7 @@ func (r *AuthRepository) CreateUser(
 		&userModel.PasswordHash,
 		&userModel.Role,
 		&userModel.EmailVerified,
+		&userModel.EmailVerifiedAt,
 	)
 	if err != nil {
 		if errors.Is(err, core_postgres_pool.ErrUniqueViolation) {
@@ -65,6 +67,7 @@ func (r *AuthRepository) CreateUser(
 		userModel.Email,
 		userModel.PasswordHash,
 		userModel.Role,
-		user.EmailVerified,
+		userModel.EmailVerified,
+		userModel.EmailVerifiedAt,
 	), nil
 }

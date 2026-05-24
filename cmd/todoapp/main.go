@@ -54,7 +54,7 @@ func WithMiddleware(
 // @description Type "Bearer {access_token}"
 func main() {
 	apiVersion := core_http_server.ApiVersion1
-	
+
 	cfg := core_config.NewConfigMust()
 	time.Local = cfg.TimeZone
 
@@ -108,6 +108,7 @@ func main() {
 		authRepository,
 		usersRepository,
 		mailer,
+		logger,
 		authConfig.JWTSecret,
 		authConfig.AccessTokenExpiry,
 		authConfig.RefreshTokenExpiry,

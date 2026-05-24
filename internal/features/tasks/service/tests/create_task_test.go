@@ -51,7 +51,7 @@ func TestCreateTask(t *testing.T) {
 				Title:        "test_task",
 				Completed:    false,
 				CreatedAt:    createdAt,
-				AuthorUserID: 999,
+				AuthorUserID: 1,
 			},
 			expectedTask: domain.Task{
 				ID:           domain.UninitializedID,

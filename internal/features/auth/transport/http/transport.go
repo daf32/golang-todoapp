@@ -50,6 +50,12 @@ type AuthService interface {
 		ctx context.Context,
 		token string,
 	) error
+
+	ResendConfirmationEmail(
+		ctx context.Context,
+		email string,
+		confirmationURL string,
+	) error
 }
 
 func NewAuthHTTPHandler(
@@ -95,6 +101,11 @@ func (h *AuthHTTPHandler) Routes() []core_http_server.Route {
 			Method:  http.MethodGet,
 			Path:    confirmEmailPath,
 			Handler: h.ConfirmEmail,
+		},
+		{
+			Method: http.MethodPost,
+			Path: "auth/resend-confirmation",
+			Handler: h.ResendConfirmationEmail,
 		},
 	}
 }

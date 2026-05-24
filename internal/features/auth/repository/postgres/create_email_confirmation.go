@@ -26,6 +26,17 @@ func (r *AuthRepository) CreateEmailConfirmationToken(
 
 	expiresAt := time.Now().Add(ttl)
 
+	if _, err := r.pool.Exec(
+		ctx,
+		`
+		DELETE FROM todoapp.email_confirmation_tokens 
+		WHERE user_id = $1 OR expires_at < now()
+		`,
+		userID,
+	); err != nil {
+		return domain.EmailConfirmationToken{}, fmt.Errorf("cleanup tokens: %w", err)
+	}
+
 	query := `
 		INSERT INTO todoapp.email_confirmation_tokens (token_hash, user_id, expires_at)
 		VALUES ($1, $2, $3)

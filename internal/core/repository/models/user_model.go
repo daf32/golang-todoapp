@@ -1,16 +1,21 @@
 package core_models
 
-import "github.com/daf32/golang-todoapp/internal/core/domain"
+import (
+	"time"
+
+	"github.com/daf32/golang-todoapp/internal/core/domain"
+)
 
 type UserModel struct {
-	ID            int
-	Version       int
-	FullName      string
-	PhoneNumber   *string
-	Email         string
-	PasswordHash  string
-	Role          domain.UserRole
-	EmailVerified bool
+	ID              int
+	Version         int
+	FullName        string
+	PhoneNumber     *string
+	Email           string
+	PasswordHash    string
+	Role            domain.UserRole
+	EmailVerified   bool
+	EmailVerifiedAt *time.Time
 }
 
 func UserDomainsFromModels(users []UserModel) []domain.User {
@@ -26,6 +31,7 @@ func UserDomainsFromModels(users []UserModel) []domain.User {
 			user.PasswordHash,
 			user.Role,
 			user.EmailVerified,
+			user.EmailVerifiedAt,
 		)
 	}
 

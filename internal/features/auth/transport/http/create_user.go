@@ -12,9 +12,9 @@ import (
 )
 
 type CreateUserRequest struct {
-	FullName    string  `json:"full_name"     validate:"required,min=3,max=100"                 example:"Ivan Ivanov"`
+	FullName    string  `json:"full_name"     validate:"required,min=3,max=100"                 example:"user_name"`
 	PhoneNumber *string `json:"phone_number"  validate:"omitempty,min=10,max=15,startswith=+"   example:"+79998887766"`
-	Email       string  `json:"email"         validate:"email,required,min=5,max=255"           example:"ivanivanov@example.ex"`
+	Email       string  `json:"email"         validate:"email,required,min=5,max=255"           example:"user@example.com"`
 	Password    string  `json:"password"      validate:"required,min=8,max=72"                 example:"password_example"`
 }
 

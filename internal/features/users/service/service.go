@@ -46,4 +46,9 @@ type UsersRepository interface {
 		user domain.User,
 		newPasswordHash string,
 	) error
+
+	GetUserByEmail(
+		ctx context.Context,
+		email string,
+	) (domain.User, error)
 }

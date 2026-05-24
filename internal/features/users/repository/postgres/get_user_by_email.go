@@ -19,7 +19,7 @@ func (r *UsersRepository) GetUserByEmail(
 	defer cancel()
 
 	query := `
-	SELECT id, version, full_name, phone_number, email, password_hash, email_verified role FROM todoapp.users
+	SELECT id, version, full_name, phone_number, email, password_hash, email_verified, role, email_verified, email_verified_at FROM todoapp.users
 	WHERE email=$1;
 	`
 
@@ -40,6 +40,7 @@ func (r *UsersRepository) GetUserByEmail(
 		&userModel.PasswordHash,
 		&userModel.Role,
 		&userModel.EmailVerified,
+		&userModel.EmailVerifiedAt,
 	)
 	if err != nil {
 		if errors.Is(err, core_postgres_pool.ErrNoRows) {
@@ -62,5 +63,6 @@ func (r *UsersRepository) GetUserByEmail(
 		userModel.PasswordHash,
 		userModel.Role,
 		userModel.EmailVerified,
+		userModel.EmailVerifiedAt,
 	), nil
 }

@@ -5,4 +5,5 @@ CREATE TABLE todoapp.email_confirmation_tokens (
     user_id     INT         NOT NULL REFERENCES todoapp.users(id) ON DELETE CASCADE,
     expires_at  TIMESTAMPTZ NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    
 );

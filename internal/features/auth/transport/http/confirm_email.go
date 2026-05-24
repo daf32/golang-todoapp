@@ -1,13 +1,17 @@
 package auth_transport_http
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
 	core_http_response "github.com/daf32/golang-todoapp/internal/core/transport/http/response"
+	"go.uber.org/zap"
 )
+
+const emailConfirmedRedirectPath = "/email-conifrmed"
 
 // ConfirmEmail   godoc
 // @Summary       Confirm email address
@@ -24,6 +28,8 @@ func (h *AuthHTTPHandler) ConfirmEmail(rw http.ResponseWriter, r *http.Request) 
 	log := core_logger.FromContext(ctx)
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
 
+	redirectBase := h.appBaseURL + emailConfirmedRedirectPath
+
 	token := r.URL.Query().Get("token")
 	if token == "" {
 		responseHandler.ErrorResponse(
@@ -35,11 +41,16 @@ func (h *AuthHTTPHandler) ConfirmEmail(rw http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := h.authService.ConfirmEmail(ctx, token); err != nil {
-		responseHandler.ErrorResponse(
-			err,
-			"failed to confirm email",
-		)
+		log.Warn("failed to confirm email", zap.Error(err))
+
+		reason := "invalid"
+		if errors.Is(err, core_errors.ErrInvalidArgument) {
+			reason = "expired"
+		}
+
+		http.Redirect(rw, r, redirectBase+"?status=error&reason"+reason, http.StatusFound)
+		return
 	}
 
-	responseHandler.NoContentResponse()
+	http.Redirect(rw, r, redirectBase+"?status=success", http.StatusFound)
 }

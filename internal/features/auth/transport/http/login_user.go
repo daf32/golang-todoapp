@@ -10,8 +10,8 @@ import (
 )
 
 type LoginUserRequest struct {
-	Email    string `json:"email"     validate:"required,min=5,max=255"  example:"jebron.lames@goat.forever"`
-	Password string `json:"password"  validate:"required,min=8,max=72"   example:"some_password"`
+	Email    string `json:"email"     validate:"required,min=5,max=255"  example:"user@example.com"`
+	Password string `json:"password"  validate:"required,min=8,max=72"   example:"user_password"`
 }
 
 type LoginUserResponse struct {

@@ -27,7 +27,7 @@ func (r *UsersRepository) PatchUser(
 		email=$3,
 		version=version+1
 	WHERE id=$4 AND version=$5
-	RETURNING id, version, full_name, phone_number, email, password_hash, role, email_verified;
+	RETURNING id, version, full_name, phone_number, email, password_hash, role, email_verified, email_verified_at;
 	`
 
 	row := r.pool.QueryRow(
@@ -50,6 +50,7 @@ func (r *UsersRepository) PatchUser(
 		&userModel.PasswordHash,
 		&userModel.Role,
 		&userModel.EmailVerified,
+		&userModel.EmailVerifiedAt,
 	)
 	if err != nil {
 		if errors.Is(err, core_postgres_pool.ErrNoRows) {
@@ -78,6 +79,7 @@ func (r *UsersRepository) PatchUser(
 		userModel.Email,
 		userModel.PasswordHash,
 		userModel.Role,
-		user.EmailVerified,
+		userModel.EmailVerified,
+		user.EmailVerifiedAt,
 	), nil
 }

@@ -6,6 +6,7 @@ import (
 
 	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	"github.com/daf32/golang-todoapp/internal/core/domain"
+	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
 	core_mailer "github.com/daf32/golang-todoapp/internal/core/mailer"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -60,6 +61,7 @@ type AuthService struct {
 	authRepository            AuthRepository
 	usersRepository           UsersRepository
 	mailer                    core_mailer.Mailer
+	log                       *core_logger.Logger
 	jwtSecret                 []byte
 	accessTokenTTL            time.Duration
 	refreshTokenTTL           time.Duration
@@ -70,6 +72,7 @@ func NewAuthService(
 	authRepository AuthRepository,
 	usersRepository UsersRepository,
 	mailer core_mailer.Mailer,
+	log *core_logger.Logger,
 	jwtSecret string,
 	accessTokenTTL time.Duration,
 	refreshTokenTTL time.Duration,
@@ -79,6 +82,7 @@ func NewAuthService(
 		authRepository:            authRepository,
 		usersRepository:           usersRepository,
 		mailer:                    mailer,
+		log:                       log,
 		jwtSecret:                 []byte(jwtSecret),
 		accessTokenTTL:            accessTokenTTL,
 		refreshTokenTTL:           refreshTokenTTL,

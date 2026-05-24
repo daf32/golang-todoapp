@@ -12,8 +12,8 @@ import (
 )
 
 type CreateTaskRequest struct {
-	Title       string  `json:"title" validate:"required,min=1,max=100" example:"Homework"`
-	Description *string `json:"description" validate:"omitempty,min=1,max=1000" example:"Do homework"`
+	Title       string  `json:"title" validate:"required,min=1,max=100" example:"basketball"`
+	Description *string `json:"description" validate:"omitempty,min=1,max=1000" example:"play_basketball"`
 }
 
 type CreateTaskResponse TaskDTOResponse

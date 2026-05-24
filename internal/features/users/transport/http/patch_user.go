@@ -19,9 +19,9 @@ import (
 var patchUserEmailRE = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
 type PatchUserRequest struct {
-	FullName    core_http_types.Nullable[string] `json:"full_name" swaggertype:"string" example:"Jebron Lames"`
+	FullName    core_http_types.Nullable[string] `json:"full_name" swaggertype:"string" example:"user_name"`
 	PhoneNumber core_http_types.Nullable[string] `json:"phone_number" swaggertype:"string" example:"+71112223344"`
-	Email       core_http_types.Nullable[string] `json:"email" swaggertype:"string" example:"jebron.lames@goat.forever"`
+	Email       core_http_types.Nullable[string] `json:"email" swaggertype:"string" example:"user@example.com"`
 }
 
 func (r *PatchUserRequest) Validate() error {
