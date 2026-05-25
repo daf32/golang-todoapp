@@ -118,6 +118,7 @@ func TestLoginUser(t *testing.T) {
 				0,
 				0,
 				0,
+				nil,
 			)
 
 			accessToken, refreshToken, err := svrc.LoginUser(ctx, tc.email, tc.password)

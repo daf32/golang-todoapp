@@ -5,6 +5,7 @@ import (
 
 	"github.com/daf32/golang-todoapp/internal/core/domain"
 	core_mailer "github.com/daf32/golang-todoapp/internal/core/mailer"
+	core_oauth "github.com/daf32/golang-todoapp/internal/core/oauth"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -41,8 +42,26 @@ func validConfirmationToken(userID int) domain.EmailConfirmationToken {
 }
 
 func newNoOpMailerMock(t interface {
-    mock.TestingT
-    Cleanup(func())
+	mock.TestingT
+	Cleanup(func())
 }) *core_mailer.MockMailer {
-    return core_mailer.NewMockMailer(t)
+	return core_mailer.NewMockMailer(t)
+}
+
+func validOAuthUserInfo() core_oauth.UserInfo {
+	return core_oauth.UserInfo{
+		Sub:           "google-sub-12345",
+		Email:         "oauth.user@example.com",
+		EmailVerified: true,
+		Name:          "OAuth User",
+	}
+}
+
+func newMockGoogleProvider(t interface {
+	mock.TestingT
+	Cleanup(func())
+}) *core_oauth.MockProvider {
+	p := core_oauth.NewMockProvider(t)
+	p.On("Name").Return(core_oauth.ProviderGoogle).Maybe()
+	return p
 }

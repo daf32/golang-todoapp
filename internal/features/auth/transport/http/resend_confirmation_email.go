@@ -17,7 +17,7 @@ type ResendConfirmationRequest struct {
 // @Description             Sends a new confirmation email if the address exists and is not yet verified
 // @Tags                    auth
 // @Accept                  json
-// @Param                   request body ResendConfirmationEmailRequest true "Email address"
+// @Param                   request body ResendConfirmationRequest true "Email address"
 // @Success                 204
 // @Failure                 400 {object} core_http_response.ErrorResponse "Bad request"
 // @Router                  /auth/resend-confirmation [post]

@@ -1,5 +1,5 @@
 all: false
-dir: '{{.InterfaceDir}}'
+dir: "{{.InterfaceDir}}"
 filename: mocks.go
 force-file-write: true
 formatter: goimports
@@ -15,12 +15,12 @@ formatter-options:
 generate: true
 include-auto-generated: false
 log-level: info
-structname: '{{.Mock}}{{.InterfaceName}}'
-pkgname: '{{.SrcPackageName}}'
+structname: "{{.Mock}}{{.InterfaceName}}"
+pkgname: "{{.SrcPackageName}}"
 recursive: false
 require-template-schema-exists: true
 template: testify
-template-schema: '{{.Template}}.schema.json'
+template-schema: "{{.Template}}.schema.json"
 packages:
   github.com/daf32/golang-todoapp/internal/features/statistics/service:
     interfaces:
@@ -37,4 +37,6 @@ packages:
   github.com/daf32/golang-todoapp/internal/core/mailer:
     interfaces:
       Mailer:
-
+  github.com/daf32/golang-todoapp/internal/core/oauth:
+    interfaces:
+      Provider:

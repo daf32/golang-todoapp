@@ -12,8 +12,11 @@ import (
 	core_config "github.com/daf32/golang-todoapp/internal/core/config"
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
 	core_mailer "github.com/daf32/golang-todoapp/internal/core/mailer"
+	core_oauth "github.com/daf32/golang-todoapp/internal/core/oauth"
 	core_pgx_pool "github.com/daf32/golang-todoapp/internal/core/repository/postgres/pool/pgx"
+	core_http_cookie "github.com/daf32/golang-todoapp/internal/core/transport/http/cookie"
 	core_http_middleware "github.com/daf32/golang-todoapp/internal/core/transport/http/middleware"
+	core_ratelimit "github.com/daf32/golang-todoapp/internal/core/transport/http/middleware/ratelimit"
 	core_http_server "github.com/daf32/golang-todoapp/internal/core/transport/http/server"
 	auth_postgres_repository "github.com/daf32/golang-todoapp/internal/features/auth/repository/postgres"
 	auth_service "github.com/daf32/golang-todoapp/internal/features/auth/service"
@@ -28,6 +31,7 @@ import (
 	users_service "github.com/daf32/golang-todoapp/internal/features/users/service"
 	users_transport_http "github.com/daf32/golang-todoapp/internal/features/users/transport/http"
 	"go.uber.org/zap"
+	"golang.org/x/time/rate"
 
 	_ "github.com/daf32/golang-todoapp/docs"
 )
@@ -101,7 +105,32 @@ func main() {
 
 	authConfig := core_auth.NewConfigMust()
 	smtpConfig := core_mailer.NewConfigMust()
+	oauthConfig := core_oauth.NewConfigMust()
+
 	mailer := core_mailer.NewSMTPMailer(smtpConfig)
+
+	googleProvider, err := core_oauth.NewGoogleProvider(
+		ctx,
+		oauthConfig.Google,
+		cfg.AppBaseURL,
+	)
+	if err != nil {
+		logger.Fatal("failed to set up google OAuth provider", zap.Error(err))
+	}
+
+	loginRL := core_ratelimit.NewMemoryLimiter(
+		rate.Every(10*time.Second), 5, 10*time.Minute,
+	)
+	registerRL := core_ratelimit.NewMemoryLimiter(
+		rate.Every(20*time.Second), 3, 10*time.Minute,
+	)
+	resendRL := core_ratelimit.NewMemoryLimiter(
+		rate.Every(60*time.Second), 3, 10*time.Minute,
+	)
+	refreshRL := core_ratelimit.NewMemoryLimiter(
+		rate.Every(time.Second), 30, 10*time.Minute,
+	)
+
 	logger.Debug("initializing feature", zap.String("feature", "auth"))
 	authRepository := auth_postgres_repository.NewAuthRepository(pool)
 	authService := auth_service.NewAuthService(
@@ -113,11 +142,20 @@ func main() {
 		authConfig.AccessTokenExpiry,
 		authConfig.RefreshTokenExpiry,
 		authConfig.EmailConfirmationTokenExpiry,
+		[]core_oauth.Provider{googleProvider},
 	)
+	cookieManager := core_http_cookie.NewManager(cfg.CookieSecure)
 	authTransportHTTP := auth_transport_http.NewAuthHTTPHandler(
 		authService,
 		apiVersion,
 		cfg.AppBaseURL,
+		cookieManager,
+		auth_transport_http.RateLimiters{
+			Login:    loginRL,
+			Register: registerRL,
+			Resend:   resendRL,
+			Refresh:  refreshRL,
+		},
 	)
 
 	logger.Debug("initializing HTTP server")

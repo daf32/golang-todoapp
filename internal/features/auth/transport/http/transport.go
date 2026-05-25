@@ -6,15 +6,26 @@ import (
 
 	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	"github.com/daf32/golang-todoapp/internal/core/domain"
+	core_http_cookie "github.com/daf32/golang-todoapp/internal/core/transport/http/cookie"
 	core_http_middleware "github.com/daf32/golang-todoapp/internal/core/transport/http/middleware"
+	core_ratelimit "github.com/daf32/golang-todoapp/internal/core/transport/http/middleware/ratelimit"
 	core_http_server "github.com/daf32/golang-todoapp/internal/core/transport/http/server"
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type RateLimiters struct {
+	Login    core_ratelimit.Limiter
+	Register core_ratelimit.Limiter
+	Resend   core_ratelimit.Limiter
+	Refresh  core_ratelimit.Limiter
+}
+
 type AuthHTTPHandler struct {
-	authService AuthService
-	apiVersion  core_http_server.ApiVersion
-	appBaseURL  string
+	authService   AuthService
+	apiVersion    core_http_server.ApiVersion
+	appBaseURL    string
+	cookieManager *core_http_cookie.Manager
+	rateLimits    RateLimiters
 }
 
 type AuthService interface {
@@ -56,17 +67,30 @@ type AuthService interface {
 		email string,
 		confirmationURL string,
 	) error
+
+	LoginUserWithOAuth(
+		ctx context.Context,
+		providerName, code, codeVerifier string,
+	) (string, core_auth.RefreshToken, error)
+
+	BuildOAuthURL(
+		providerName, state, codeVerifier string,
+	) (string, error)
 }
 
 func NewAuthHTTPHandler(
 	authService AuthService,
 	apiVersion core_http_server.ApiVersion,
 	appBaseURL string,
+	cookieManager *core_http_cookie.Manager,
+	rateLimits RateLimiters,
 ) *AuthHTTPHandler {
 	return &AuthHTTPHandler{
-		authService: authService,
-		apiVersion:  apiVersion,
-		appBaseURL:  appBaseURL,
+		authService:   authService,
+		apiVersion:    apiVersion,
+		appBaseURL:    appBaseURL,
+		cookieManager: cookieManager,
+		rateLimits:    rateLimits,
 	}
 }
 
@@ -78,16 +102,25 @@ func (h *AuthHTTPHandler) Routes() []core_http_server.Route {
 			Method:  http.MethodPost,
 			Path:    "/auth/register",
 			Handler: h.CreateUser,
+			Middleware: []core_http_middleware.Middleware{
+				core_ratelimit.Middleware(h.rateLimits.Register, nil),
+			},
 		},
 		{
 			Method:  http.MethodPost,
 			Path:    "/auth/login",
 			Handler: h.LoginUser,
+			Middleware: []core_http_middleware.Middleware{
+				core_ratelimit.Middleware(h.rateLimits.Login, nil),
+			},
 		},
 		{
 			Method:  http.MethodPost,
 			Path:    "/auth/refresh",
 			Handler: h.RefreshToken,
+			Middleware: []core_http_middleware.Middleware{
+				core_ratelimit.Middleware(h.rateLimits.Refresh, nil),
+			},
 		},
 		{
 			Method:  http.MethodPost,
@@ -95,6 +128,7 @@ func (h *AuthHTTPHandler) Routes() []core_http_server.Route {
 			Handler: h.LogoutUser,
 			Middleware: []core_http_middleware.Middleware{
 				core_http_middleware.Auth(h.authService),
+				
 			},
 		},
 		{
@@ -103,9 +137,23 @@ func (h *AuthHTTPHandler) Routes() []core_http_server.Route {
 			Handler: h.ConfirmEmail,
 		},
 		{
-			Method: http.MethodPost,
-			Path: "auth/resend-confirmation",
+			Method:  http.MethodPost,
+			Path:    "auth/resend-confirmation",
 			Handler: h.ResendConfirmationEmail,
+			Middleware: []core_http_middleware.Middleware{
+				core_ratelimit.Middleware(h.rateLimits.Resend, nil),
+			},
+		},
+
+		{
+			Method:  http.MethodGet,
+			Path:    "/auth/oauth/{provider}",
+			Handler: h.StartOAuth,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/auth/oauth/{provider}/callback",
+			Handler: h.OAuthCallback,
 		},
 	}
 }

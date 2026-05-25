@@ -8,8 +8,17 @@ import (
 	"github.com/daf32/golang-todoapp/internal/core/domain"
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
 	core_mailer "github.com/daf32/golang-todoapp/internal/core/mailer"
+	core_oauth "github.com/daf32/golang-todoapp/internal/core/oauth"
 	"github.com/golang-jwt/jwt/v5"
 )
+
+type GoogleProvider interface {
+	Exchange(
+		ctx context.Context,
+		code string,
+		codeVerifier string,
+	) string
+}
 
 type AuthRepository interface {
 	CreateUser(
@@ -43,6 +52,17 @@ type AuthRepository interface {
 		ctx context.Context,
 		token string,
 	) (domain.EmailConfirmationToken, error)
+
+	GetUserOAuthIdentity(
+		ctx context.Context,
+		provider, providerSub string,
+	) (domain.UserOAuthIdentity, error)
+
+	CreateUserOAuthIdentity(
+		ctx context.Context,
+		userID int,
+		provider, providerSub, email string,
+	) (domain.UserOAuthIdentity, error)
 }
 
 type UsersRepository interface {
@@ -66,6 +86,7 @@ type AuthService struct {
 	accessTokenTTL            time.Duration
 	refreshTokenTTL           time.Duration
 	emailConfirmationTokenTTL time.Duration
+	oauthProviders            map[string]core_oauth.Provider
 }
 
 func NewAuthService(
@@ -77,7 +98,13 @@ func NewAuthService(
 	accessTokenTTL time.Duration,
 	refreshTokenTTL time.Duration,
 	emailConfirmationTokenTTL time.Duration,
+	oauthProviders []core_oauth.Provider,
 ) *AuthService {
+	providersByName := make(map[string]core_oauth.Provider, len(oauthProviders))
+	for _, p := range oauthProviders {
+		providersByName[p.Name()] = p
+	}
+	
 	return &AuthService{
 		authRepository:            authRepository,
 		usersRepository:           usersRepository,
@@ -87,6 +114,7 @@ func NewAuthService(
 		accessTokenTTL:            accessTokenTTL,
 		refreshTokenTTL:           refreshTokenTTL,
 		emailConfirmationTokenTTL: emailConfirmationTokenTTL,
+		oauthProviders:            providersByName,
 	}
 }
 

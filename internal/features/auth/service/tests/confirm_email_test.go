@@ -77,6 +77,7 @@ func TestConfirmEmail(t *testing.T) {
 				0,
 				0,
 				0,
+				nil,
 			)
 
 			err := srvc.ConfirmEmail(context.Background(), tc.token)

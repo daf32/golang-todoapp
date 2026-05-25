@@ -250,6 +250,90 @@ func (_c *MockAuthRepository_CreateUser_Call) RunAndReturn(run func(ctx context.
 	return _c
 }
 
+// CreateUserOAuthIdentity provides a mock function for the type MockAuthRepository
+func (_mock *MockAuthRepository) CreateUserOAuthIdentity(ctx context.Context, userID int, provider string, providerSub string, email string) (domain.UserOAuthIdentity, error) {
+	ret := _mock.Called(ctx, userID, provider, providerSub, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateUserOAuthIdentity")
+	}
+
+	var r0 domain.UserOAuthIdentity
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, string, string, string) (domain.UserOAuthIdentity, error)); ok {
+		return returnFunc(ctx, userID, provider, providerSub, email)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, string, string, string) domain.UserOAuthIdentity); ok {
+		r0 = returnFunc(ctx, userID, provider, providerSub, email)
+	} else {
+		r0 = ret.Get(0).(domain.UserOAuthIdentity)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, string, string, string) error); ok {
+		r1 = returnFunc(ctx, userID, provider, providerSub, email)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockAuthRepository_CreateUserOAuthIdentity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateUserOAuthIdentity'
+type MockAuthRepository_CreateUserOAuthIdentity_Call struct {
+	*mock.Call
+}
+
+// CreateUserOAuthIdentity is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID int
+//   - provider string
+//   - providerSub string
+//   - email string
+func (_e *MockAuthRepository_Expecter) CreateUserOAuthIdentity(ctx interface{}, userID interface{}, provider interface{}, providerSub interface{}, email interface{}) *MockAuthRepository_CreateUserOAuthIdentity_Call {
+	return &MockAuthRepository_CreateUserOAuthIdentity_Call{Call: _e.mock.On("CreateUserOAuthIdentity", ctx, userID, provider, providerSub, email)}
+}
+
+func (_c *MockAuthRepository_CreateUserOAuthIdentity_Call) Run(run func(ctx context.Context, userID int, provider string, providerSub string, email string)) *MockAuthRepository_CreateUserOAuthIdentity_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 string
+		if args[4] != nil {
+			arg4 = args[4].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *MockAuthRepository_CreateUserOAuthIdentity_Call) Return(userOAuthIdentity domain.UserOAuthIdentity, err error) *MockAuthRepository_CreateUserOAuthIdentity_Call {
+	_c.Call.Return(userOAuthIdentity, err)
+	return _c
+}
+
+func (_c *MockAuthRepository_CreateUserOAuthIdentity_Call) RunAndReturn(run func(ctx context.Context, userID int, provider string, providerSub string, email string) (domain.UserOAuthIdentity, error)) *MockAuthRepository_CreateUserOAuthIdentity_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetAndConsumeEmailConfirmationToken provides a mock function for the type MockAuthRepository
 func (_mock *MockAuthRepository) GetAndConsumeEmailConfirmationToken(ctx context.Context, token string) (domain.EmailConfirmationToken, error) {
 	ret := _mock.Called(ctx, token)
@@ -378,6 +462,78 @@ func (_c *MockAuthRepository_GetRefreshToken_Call) Return(refreshToken core_auth
 }
 
 func (_c *MockAuthRepository_GetRefreshToken_Call) RunAndReturn(run func(ctx context.Context, tokenString string) (core_auth.RefreshToken, error)) *MockAuthRepository_GetRefreshToken_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetUserOAuthIdentity provides a mock function for the type MockAuthRepository
+func (_mock *MockAuthRepository) GetUserOAuthIdentity(ctx context.Context, provider string, providerSub string) (domain.UserOAuthIdentity, error) {
+	ret := _mock.Called(ctx, provider, providerSub)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserOAuthIdentity")
+	}
+
+	var r0 domain.UserOAuthIdentity
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (domain.UserOAuthIdentity, error)); ok {
+		return returnFunc(ctx, provider, providerSub)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) domain.UserOAuthIdentity); ok {
+		r0 = returnFunc(ctx, provider, providerSub)
+	} else {
+		r0 = ret.Get(0).(domain.UserOAuthIdentity)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = returnFunc(ctx, provider, providerSub)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockAuthRepository_GetUserOAuthIdentity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserOAuthIdentity'
+type MockAuthRepository_GetUserOAuthIdentity_Call struct {
+	*mock.Call
+}
+
+// GetUserOAuthIdentity is a helper method to define mock.On call
+//   - ctx context.Context
+//   - provider string
+//   - providerSub string
+func (_e *MockAuthRepository_Expecter) GetUserOAuthIdentity(ctx interface{}, provider interface{}, providerSub interface{}) *MockAuthRepository_GetUserOAuthIdentity_Call {
+	return &MockAuthRepository_GetUserOAuthIdentity_Call{Call: _e.mock.On("GetUserOAuthIdentity", ctx, provider, providerSub)}
+}
+
+func (_c *MockAuthRepository_GetUserOAuthIdentity_Call) Run(run func(ctx context.Context, provider string, providerSub string)) *MockAuthRepository_GetUserOAuthIdentity_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockAuthRepository_GetUserOAuthIdentity_Call) Return(userOAuthIdentity domain.UserOAuthIdentity, err error) *MockAuthRepository_GetUserOAuthIdentity_Call {
+	_c.Call.Return(userOAuthIdentity, err)
+	return _c
+}
+
+func (_c *MockAuthRepository_GetUserOAuthIdentity_Call) RunAndReturn(run func(ctx context.Context, provider string, providerSub string) (domain.UserOAuthIdentity, error)) *MockAuthRepository_GetUserOAuthIdentity_Call {
 	_c.Call.Return(run)
 	return _c
 }

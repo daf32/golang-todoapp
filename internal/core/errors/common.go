@@ -9,4 +9,5 @@ var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrForbidden          = errors.New("forbidden")
 	ErrEmailNotVerified   = errors.New("email not verified")
+	ErrTooManyRequests    = errors.New("too many requests")
 )

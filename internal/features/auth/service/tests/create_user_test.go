@@ -114,7 +114,10 @@ func TestCreateUser(t *testing.T) {
 				mailer,
 				nil,
 				"test-secret",
-				0, 0, 0,
+				0,
+				0,
+				0,
+				nil,
 			)
 
 			got, err := svc.CreateUser(ctx, tc.input, tc.password, confirmationURL)

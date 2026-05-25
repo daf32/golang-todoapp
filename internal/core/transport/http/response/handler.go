@@ -81,6 +81,10 @@ func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
 		statusCode = http.StatusForbidden
 		logFunc = h.log.Warn
 
+	case errors.Is(err, core_errors.ErrTooManyRequests):
+		statusCode = http.StatusTooManyRequests
+		logFunc = h.log.Warn
+
 	default:
 		statusCode = http.StatusInternalServerError
 		logFunc = h.log.Error

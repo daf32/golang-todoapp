@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
+	"github.com/daf32/golang-todoapp/internal/core/domain"
 	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
 )
 
@@ -49,6 +50,13 @@ func (s *AuthService) LoginUser(
 		)
 	}
 
+	return s.issueTokens(ctx, user)
+}
+
+func (s *AuthService) issueTokens(
+	ctx context.Context,
+	user domain.User,
+) (string, core_auth.RefreshToken, error) {
 	acessToken, err := s.generateAccessToken(user)
 	if err != nil {
 		return "", core_auth.RefreshToken{}, fmt.Errorf(

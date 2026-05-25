@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	TimeZone   *time.Location `envconfig:"TIME_ZONE"    default:"UTC"`
-	AppBaseURL string         `envconfig:"APP_BASE_URL" required:"true"`
+	TimeZone     *time.Location `envconfig:"TIME_ZONE"     default:"UTC"`
+	AppBaseURL   string         `envconfig:"APP_BASE_URL"  required:"true"`
+	CookieSecure bool           `envconfig:"COOKIE_SECURE" default:"true"`
 }
 
 func NewConfig() (Config, error) {
