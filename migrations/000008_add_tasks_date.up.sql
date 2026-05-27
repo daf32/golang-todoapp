@@ -1,0 +1,2 @@
+ALTER TABLE todoapp.tasks
+    ADD COLUMN date TIMESTAMPTZ NOT NULL DEFAULT now();

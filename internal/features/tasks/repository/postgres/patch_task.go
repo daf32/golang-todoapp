@@ -17,7 +17,7 @@ func (r *TasksRepository) PatchTask(
 ) (domain.Task, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
-	
+
 	query := `
 	UPDATE todoapp.tasks
 	SET
@@ -27,9 +27,9 @@ func (r *TasksRepository) PatchTask(
 		completed_at=$4,
 		version=version + 1
 	WHERE id=$5 AND version=$6
-	RETURNING id, version, title, description, completed, created_at, completed_at, author_user_id;
+	RETURNING id, version, title, description, completed, created_at, completed_at, author_user_id, date;
 	`
-	
+
 	row := r.pool.QueryRow(
 		ctx,
 		query,
@@ -40,9 +40,9 @@ func (r *TasksRepository) PatchTask(
 		id,
 		task.Version,
 	)
-	
+
 	var taskModel TaskModel
-	
+
 	err := row.Scan(
 		&taskModel.ID,
 		&taskModel.Version,
@@ -52,6 +52,7 @@ func (r *TasksRepository) PatchTask(
 		&taskModel.CreatedAt,
 		&taskModel.CompletedAt,
 		&taskModel.AuthorUserID,
+		&taskModel.Date,
 	)
 	if err != nil {
 		if errors.Is(err, core_postgres_pool.ErrNoRows) {
@@ -61,11 +62,11 @@ func (r *TasksRepository) PatchTask(
 				core_errors.ErrConfict,
 			)
 		}
-		
+
 		return domain.Task{}, fmt.Errorf("scan error: %w", err)
 	}
-	
+
 	taskDomain := taskDomainFromModel(taskModel)
-	
+
 	return taskDomain, nil
 }

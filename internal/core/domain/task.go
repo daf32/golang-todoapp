@@ -18,6 +18,8 @@ type Task struct {
 	CompletedAt *time.Time
 
 	AuthorUserID int
+
+	Date time.Time
 }
 
 func NewTask(
@@ -29,6 +31,7 @@ func NewTask(
 	createdAt time.Time,
 	compleatedAt *time.Time,
 	authorUserId int,
+	date time.Time,
 ) Task {
 	return Task{
 		ID:           id,
@@ -39,6 +42,7 @@ func NewTask(
 		CreatedAt:    createdAt,
 		CompletedAt:  compleatedAt,
 		AuthorUserID: authorUserId,
+		Date:         date,
 	}
 }
 
@@ -46,13 +50,13 @@ func (t *Task) CompletionDuration() *time.Duration {
 	if !t.Completed {
 		return nil
 	}
-	
+
 	if t.CompletedAt == nil {
 		return nil
 	}
-	
+
 	duration := t.CompletedAt.Sub(t.CreatedAt)
-	
+
 	return &duration
 }
 
@@ -60,6 +64,7 @@ func NewTaskUninitialized(
 	title string,
 	description *string,
 	authorUserID int,
+	date time.Time,
 ) Task {
 	return NewTask(
 		UninitializedID,
@@ -70,6 +75,7 @@ func NewTaskUninitialized(
 		time.Now(),
 		nil,
 		authorUserID,
+		date,
 	)
 }
 
@@ -145,14 +151,14 @@ func (p *TaskPatch) Validate() error {
 			core_errors.ErrInvalidArgument,
 		)
 	}
-	
+
 	if p.Completed.Set && p.Completed.Value == nil {
 		return fmt.Errorf(
 			"`Completed` can't be patche to NULL: %w",
 			core_errors.ErrInvalidArgument,
 		)
 	}
-	
+
 	return nil
 }
 
@@ -160,19 +166,19 @@ func (t *Task) ApplyPatch(patch TaskPatch) error {
 	if err := patch.Validate(); err != nil {
 		return fmt.Errorf("validate task patch: %w", err)
 	}
-	
+
 	tmp := *t
 	if patch.Title.Set {
 		tmp.Title = *patch.Title.Value
 	}
-	
+
 	if patch.Description.Set {
 		tmp.Description = patch.Description.Value
 	}
-	
+
 	if patch.Completed.Set {
 		tmp.Completed = *patch.Completed.Value
-	
+
 		if tmp.Completed {
 			completedAt := time.Now()
 			tmp.CompletedAt = &completedAt
@@ -180,12 +186,12 @@ func (t *Task) ApplyPatch(patch TaskPatch) error {
 			tmp.CompletedAt = nil
 		}
 	}
-	
+
 	if err := tmp.Validate(); err != nil {
 		return fmt.Errorf("validate patched task: %w", err)
 	}
-	
+
 	*t = tmp
-	
+
 	return nil
 }

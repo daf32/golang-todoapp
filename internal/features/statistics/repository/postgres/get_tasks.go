@@ -21,7 +21,7 @@ func (r *StatisticsRepository) GetTasks(
 	var queryBuilder strings.Builder
 
 	queryBuilder.WriteString(`
-	SELECT id, version, title, description, completed, created_at, completed_at, author_user_id
+	SELECT id, version, title, description, completed, created_at, completed_at, author_user_id, date
 	FROM todoapp.tasks
 	`)
 
@@ -73,6 +73,7 @@ func (r *StatisticsRepository) GetTasks(
 			&taskModel.CreatedAt,
 			&taskModel.CompletedAt,
 			&taskModel.AuthorUserID,
+			&taskModel.Date,
 		)
 
 		if err != nil {

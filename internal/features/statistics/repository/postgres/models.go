@@ -15,6 +15,7 @@ type TaskModel struct {
 	CreatedAt    time.Time
 	CompletedAt  *time.Time
 	AuthorUserID int
+	Date         time.Time
 }
 
 func taskDomainFromModel(taskModel TaskModel) domain.Task {
@@ -27,6 +28,7 @@ func taskDomainFromModel(taskModel TaskModel) domain.Task {
 		taskModel.CreatedAt,
 		taskModel.CompletedAt,
 		taskModel.AuthorUserID,
+		taskModel.Date,
 	)
 }
 
@@ -43,6 +45,7 @@ func taskDomainsFromModels(taskModels []TaskModel) []domain.Task {
 			model.CreatedAt,
 			model.CompletedAt,
 			model.AuthorUserID,
+			model.Date,
 		)
 	}
 

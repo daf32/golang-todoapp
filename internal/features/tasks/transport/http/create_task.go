@@ -2,6 +2,7 @@ package tasks_transport_http
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/daf32/golang-todoapp/internal/core/domain"
 	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
@@ -12,8 +13,9 @@ import (
 )
 
 type CreateTaskRequest struct {
-	Title       string  `json:"title" validate:"required,min=1,max=100" example:"basketball"`
-	Description *string `json:"description" validate:"omitempty,min=1,max=1000" example:"play_basketball"`
+	Title       string    `json:"title"       validate:"required,min=1,max=100"   example:"basketball"`
+	Description *string   `json:"description" validate:"omitempty,min=1,max=1000" example:"play_basketball"`
+	Date        time.Time `json:"date"        validate:"required"                 example:"2026-05-26T10:55:34Z"`
 }
 
 type CreateTaskResponse TaskDTOResponse
@@ -61,6 +63,7 @@ func (h *TasksHTTPHandler) CreateTask(rw http.ResponseWriter, r *http.Request) {
 		request.Title,
 		request.Description,
 		actor.UserID,
+		request.Date,
 	)
 
 	taskDomain, err := h.tasksService.CreateTask(ctx, actor, taskDomain)
