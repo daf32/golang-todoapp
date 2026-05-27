@@ -12,22 +12,38 @@ func (r *UsersRepository) GetUsers(
 	ctx context.Context,
 	limit *int,
 	offset *int,
+	emailVerified *bool,
 ) ([]domain.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
 
 	query := `
-	SELECT id, version, full_name, phone_number, email, password_hash, role, email_verified, email_verified_at FROM todoapp.users
-	ORDER BY id ASC
-	LIMIT $1
-	OFFSET $2;
+	SELECT id, version, full_name, phone_number, email, password_hash, role, email_verified, email_verified_at, created_at FROM todoapp.users
 	`
+
+	args := []any{}
+
+	if emailVerified != nil {
+		args = append(args, *emailVerified)
+		query += fmt.Sprintf(" WHERE email_verified = $%d", len(args))
+	}
+
+	query += " ORDER BY id"
+
+	if limit != nil {
+		args = append(args, *limit)
+		query += fmt.Sprintf(" LIMIT $%d", len(args))
+	}
+
+	if offset != nil {
+		args = append(args, *offset)
+		query += fmt.Sprintf(" OFFSET $%d", len(args))
+	}
 
 	rows, err := r.pool.Query(
 		ctx,
 		query,
-		limit,
-		offset,
+		args...,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("select users: %w", err)
@@ -48,6 +64,7 @@ func (r *UsersRepository) GetUsers(
 			&userModel.Role,
 			&userModel.EmailVerified,
 			&userModel.EmailVerifiedAt,
+			&userModel.CreatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("scan users: %w", err)

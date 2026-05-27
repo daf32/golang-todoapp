@@ -88,9 +88,16 @@ func main() {
 	}
 	defer pool.Close()
 
+	logger.Debug("initializing feature", zap.String("feature", "auth"))
+	authRepository := auth_postgres_repository.NewAuthRepository(pool)
+
 	logger.Debug("initializing feature", zap.String("feature", "users"))
 	usersRepository := users_postgres_repository.NewUsersRepository(pool)
-	usersService := users_service.NewUsersService(usersRepository)
+	usersService := users_service.NewUsersService(
+		usersRepository,
+		logger,
+		authRepository,
+	)
 	usersTransportHTTP := users_transport_http.NewUsersHTTPHanlder(usersService)
 
 	logger.Debug("initialing feature", zap.String("feature", "tasks"))
@@ -109,10 +116,14 @@ func main() {
 
 	mailer := core_mailer.NewSMTPMailer(smtpConfig)
 
+	googleRedirectURL := cfg.AppBaseURL + apiVersion.Path(
+		"/auth/oauth/"+core_oauth.ProviderGoogle+"/callback",
+	)
+
 	googleProvider, err := core_oauth.NewGoogleProvider(
 		ctx,
 		oauthConfig.Google,
-		cfg.AppBaseURL,
+		googleRedirectURL,
 	)
 	if err != nil {
 		logger.Fatal("failed to set up google OAuth provider", zap.Error(err))
@@ -130,9 +141,6 @@ func main() {
 	refreshRL := core_ratelimit.NewMemoryLimiter(
 		rate.Every(time.Second), 30, 10*time.Minute,
 	)
-
-	logger.Debug("initializing feature", zap.String("feature", "auth"))
-	authRepository := auth_postgres_repository.NewAuthRepository(pool)
 	authService := auth_service.NewAuthService(
 		authRepository,
 		usersRepository,
@@ -194,6 +202,15 @@ func main() {
 	)
 	httpServer.RegisterSPA("frontend/dist")
 	httpServer.RegisterSwagger()
+
+	usersConfig := users_service.NewConfigMust()
+
+	go usersService.RunUnverifiedCleanupLoop(
+		ctx,
+		usersConfig.UnverifiedCleanupInterval,
+		usersConfig.UnverifiedCleanupMinAge,
+	)
+	
 	if err := httpServer.Run(ctx); err != nil {
 		logger.Error("HTTP server run error", zap.Error(err))
 	}

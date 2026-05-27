@@ -63,6 +63,11 @@ type AuthRepository interface {
 		userID int,
 		provider, providerSub, email string,
 	) (domain.UserOAuthIdentity, error)
+
+	RevokeAllRefreshTokensForUser(
+		ctx context.Context,
+		userID int,
+	) error
 }
 
 type UsersRepository interface {
@@ -104,7 +109,7 @@ func NewAuthService(
 	for _, p := range oauthProviders {
 		providersByName[p.Name()] = p
 	}
-	
+
 	return &AuthService{
 		authRepository:            authRepository,
 		usersRepository:           usersRepository,

@@ -47,7 +47,7 @@ func TestDeleteUser(t *testing.T) {
 				tc.id,
 			).Return(tc.repositoryErr).Once()
 
-			srvc := users_service.NewUsersService(repo)
+			srvc := users_service.NewUsersService(repo, nil, nil)
 
 			err := srvc.DeleteUser(tc.ctx, tc.id)
 

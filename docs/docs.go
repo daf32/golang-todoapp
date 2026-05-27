@@ -802,6 +802,12 @@ const docTemplate = `{
                         "description": "Users page shifting",
                         "name": "offset",
                         "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by email verification status",
+                        "name": "email_verified",
+                        "in": "query"
                     }
                 ],
                 "responses": {

@@ -99,7 +99,16 @@ func TestChangeUserPassword(t *testing.T) {
 				).Return(tc.repositoryErr).Once()
 			}
 
-			svrc := users_service.NewUsersService(repo)
+			authRepo := users_service.NewMockAuthRepository(t)
+			if tc.expectRepoCall && tc.repositoryErr == nil {
+				authRepo.On(
+					"RevokeAllRefreshTokensForUser",
+					tc.ctx,
+					tc.user.ID,
+				).Return(nil).Once()
+			}
+
+			svrc := users_service.NewUsersService(repo, nil, authRepo)
 
 			err := svrc.ChangeUserPassword(
 				tc.ctx,

@@ -12,6 +12,7 @@ func (s *UsersService) GetUsers(
 	ctx context.Context,
 	limit *int,
 	offset *int,
+	emailVerified *bool,
 ) ([]domain.User, error) {
 	if limit != nil && *limit < 0 {
 		return nil, fmt.Errorf(
@@ -30,6 +31,7 @@ func (s *UsersService) GetUsers(
 		ctx,
 		limit,
 		offset,
+		emailVerified,
 	)
 	if err != nil {
 		return nil, fmt.Errorf(

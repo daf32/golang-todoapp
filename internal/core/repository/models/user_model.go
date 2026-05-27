@@ -16,6 +16,7 @@ type UserModel struct {
 	Role            domain.UserRole
 	EmailVerified   bool
 	EmailVerifiedAt *time.Time
+	CreatedAt       time.Time
 }
 
 func UserDomainsFromModels(users []UserModel) []domain.User {
@@ -32,6 +33,7 @@ func UserDomainsFromModels(users []UserModel) []domain.User {
 			user.Role,
 			user.EmailVerified,
 			user.EmailVerifiedAt,
+			user.CreatedAt,
 		)
 	}
 

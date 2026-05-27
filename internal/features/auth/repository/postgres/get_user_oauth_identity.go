@@ -37,7 +37,7 @@ func (r *AuthRepository) GetUserOAuthIdentity(
 		&identity.Provider,
 		&identity.ProviderSub,
 		&identity.Email,
-		&identity.CreateAt,
+		&identity.CreatedAt,
 	); err != nil {
 		if err == core_postgres_pool.ErrNoRows {
 			return domain.UserOAuthIdentity{}, fmt.Errorf(

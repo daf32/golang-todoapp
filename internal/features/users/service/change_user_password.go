@@ -7,6 +7,7 @@ import (
 	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	"github.com/daf32/golang-todoapp/internal/core/domain"
 	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
+	"go.uber.org/zap"
 )
 
 func (s *UsersService) ChangeUserPassword(
@@ -60,6 +61,11 @@ func (s *UsersService) ChangeUserPassword(
 		newPasswordHash,
 	); err != nil {
 		return fmt.Errorf("change user password: %w", err)
+	}
+
+	if err := s.authRepository.RevokeAllRefreshTokensForUser(ctx, userID); err != nil {
+		s.log.Error("revoke sessions after password change failed",
+			zap.Int("user_id", userID), zap.Error(err))
 	}
 
 	return nil

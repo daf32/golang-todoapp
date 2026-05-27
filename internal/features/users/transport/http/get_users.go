@@ -20,6 +20,7 @@ type GetUsersResponse []core_dto.UserDTOResponse
 // @Security 	 BearerAuth
 // @Param 		 limit query int false "Users page size"
 // @Param 		 offset query int false "Users page shifting"
+// @Param        email_verified query bool false "Filter by email verification status"
 // @Success 	 200 {object} GetUsersResponse "Seccessfull get a list of users"
 // @Failure 	 400 {object} core_http_response.ErrorResponse  "Bad request"
 // @Failure 	 401 {object} core_http_response.ErrorResponse "Unauthorized"
@@ -31,17 +32,17 @@ func (h *UsersHTTPHanlder) GetUsers(rw http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(ctx)
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
 
-	limit, offset, err := getLimitOffsetQueryParams(r)
+	limit, offset, emailVerified, err := getLimitOffsetEmailVerifiedQueryParams(r)
 	if err != nil {
 		responseHandler.ErrorResponse(
 			err,
-			"failed to get `limit`/`offset` query param",
+			"failed to get `limit`/`offset`/`email_verified` query param",
 		)
 
 		return
 	}
 
-	userDomains, err := h.userService.GetUsers(ctx, limit, offset)
+	userDomains, err := h.userService.GetUsers(ctx, limit, offset, emailVerified)
 	if err != nil {
 		responseHandler.ErrorResponse(
 			err,
@@ -56,20 +57,25 @@ func (h *UsersHTTPHanlder) GetUsers(rw http.ResponseWriter, r *http.Request) {
 	responseHandler.JSONResponse(response, http.StatusOK)
 }
 
-func getLimitOffsetQueryParams(r *http.Request) (*int, *int, error) {
+func getLimitOffsetEmailVerifiedQueryParams(r *http.Request) (*int, *int, *bool, error) {
 	const (
-		limitQueryParamKey  = "limit"
-		offsetQueryParamKey = "offset"
+		limitQueryParamKey         = "limit"
+		offsetQueryParamKey        = "offset"
+		emailVerifiedQueryParamKey = "email_verified"
 	)
 
 	limit, err := core_http_request.GetIntQueryParam(r, limitQueryParamKey)
 	if err != nil {
-		return nil, nil, fmt.Errorf("get limit query param: %w", err)
+		return nil, nil, nil, fmt.Errorf("get limit query param: %w", err)
 	}
 	offset, err := core_http_request.GetIntQueryParam(r, offsetQueryParamKey)
 	if err != nil {
-		return nil, nil, fmt.Errorf("get offset query param: %w", err)
+		return nil, nil, nil, fmt.Errorf("get offset query param: %w", err)
+	}
+	emailVerified, err := core_http_request.GetBoolQueryParam(r, emailVerifiedQueryParamKey)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("get email_verified query param: %w", err)
 	}
 
-	return limit, offset, nil
+	return limit, offset, emailVerified, nil
 }

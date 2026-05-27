@@ -19,6 +19,7 @@ type UsersService interface {
 		ctx context.Context,
 		limit *int,
 		offset *int,
+		emailVerified *bool,
 	) ([]domain.User, error)
 
 	GetUser(

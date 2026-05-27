@@ -89,7 +89,7 @@ func TestPatchUser(t *testing.T) {
 			id:    originalUser.ID,
 			patch: domain.UserPatch{
 				PhoneNumber: domain.Nullable[string]{
-					Value: stringPtr("not-a-phone"),
+					Value: typePtr[string]("not-a-phone"),
 					Set:   true,
 				},
 			},
@@ -105,7 +105,7 @@ func TestPatchUser(t *testing.T) {
 			id:    originalUser.ID,
 			patch: domain.UserPatch{
 				FullName: domain.Nullable[string]{
-					Value: stringPtr(newFullName),
+					Value: typePtr[string](newFullName),
 					Set:   true,
 				},
 			},
@@ -126,7 +126,7 @@ func TestPatchUser(t *testing.T) {
 			id: originalUser.ID,
 			patch: domain.UserPatch{
 				FullName: domain.Nullable[string]{
-					Value: stringPtr(newFullName),
+					Value: typePtr[string](newFullName),
 					Set:   true,
 				},
 			},
@@ -163,7 +163,7 @@ func TestPatchUser(t *testing.T) {
 				).Return(tc.repositoryPatchUser, tc.repositoryPatchErr).Once()
 			}
 
-			srvc := users_service.NewUsersService(repo)
+			srvc := users_service.NewUsersService(repo, nil, nil)
 
 			user, err := srvc.PatchUser(tc.ctx, tc.actor, tc.id, tc.patch)
 

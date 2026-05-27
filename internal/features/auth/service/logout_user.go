@@ -31,3 +31,14 @@ func (s *AuthService) LogoutUser(
 
 	return nil
 }
+
+func (s *AuthService) LogoutAllUserSessions(
+	ctx context.Context,
+	userID int,
+) error {
+	if err := s.authRepository.RevokeAllRefreshTokensForUser(ctx, userID); err != nil {
+		return fmt.Errorf("revoke all refresh tokens: %w", err)
+	}
+
+	return nil
+}

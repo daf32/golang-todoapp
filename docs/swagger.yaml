@@ -881,6 +881,10 @@ paths:
         in: query
         name: offset
         type: integer
+      - description: Filter by email verification status
+        in: query
+        name: email_verified
+        type: boolean
       produces:
       - application/json
       responses:

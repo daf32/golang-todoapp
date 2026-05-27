@@ -31,6 +31,7 @@ packages:
   github.com/daf32/golang-todoapp/internal/features/users/service:
     interfaces:
       UsersRepository:
+      AuthRepository:
   github.com/daf32/golang-todoapp/internal/features/auth/service:
     interfaces:
       AuthRepository:

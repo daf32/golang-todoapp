@@ -76,6 +76,11 @@ type AuthService interface {
 	BuildOAuthURL(
 		providerName, state, codeVerifier string,
 	) (string, error)
+
+	LogoutAllUserSessions(
+		ctx context.Context,
+		userID int,
+	) error
 }
 
 func NewAuthHTTPHandler(
@@ -128,7 +133,6 @@ func (h *AuthHTTPHandler) Routes() []core_http_server.Route {
 			Handler: h.LogoutUser,
 			Middleware: []core_http_middleware.Middleware{
 				core_http_middleware.Auth(h.authService),
-				
 			},
 		},
 		{
@@ -154,6 +158,14 @@ func (h *AuthHTTPHandler) Routes() []core_http_server.Route {
 			Method:  http.MethodGet,
 			Path:    "/auth/oauth/{provider}/callback",
 			Handler: h.OAuthCallback,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/auth/logout-all",
+			Handler: h.LogoutAllUserSessions,
+			Middleware: []core_http_middleware.Middleware{
+				core_http_middleware.Auth(h.authService),
+			},
 		},
 	}
 }

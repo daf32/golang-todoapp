@@ -31,6 +31,7 @@ type User struct {
 	Role            UserRole
 	EmailVerified   bool
 	EmailVerifiedAt *time.Time
+	CreatedAt       time.Time
 }
 
 func NewUser(
@@ -43,17 +44,19 @@ func NewUser(
 	role UserRole,
 	emailVerified bool,
 	emailVerifiedAt *time.Time,
+	createdAt time.Time,
 ) User {
 	return User{
-		ID:            id,
-		Version:       version,
-		FullName:      fullName,
-		PhoneNumber:   phoneNumber,
-		Email:         email,
-		PasswordHash:  passwordHash,
-		Role:          role,
-		EmailVerified: emailVerified,
+		ID:              id,
+		Version:         version,
+		FullName:        fullName,
+		PhoneNumber:     phoneNumber,
+		Email:           email,
+		PasswordHash:    passwordHash,
+		Role:            role,
+		EmailVerified:   emailVerified,
 		EmailVerifiedAt: emailVerifiedAt,
+		CreatedAt:       createdAt,
 	}
 }
 
@@ -73,6 +76,7 @@ func NewUserUninitialized(
 		role,
 		UninitializedEmailVerified,
 		nil,
+		time.Time{},
 	)
 }
 

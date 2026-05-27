@@ -8,5 +8,5 @@ type UserOAuthIdentity struct {
 	Provider    string
 	ProviderSub string
 	Email       string
-	CreateAt    time.Time
+	CreatedAt   time.Time
 }

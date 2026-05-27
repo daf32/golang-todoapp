@@ -18,7 +18,7 @@ func (r *AuthRepository) CreateUserOAuthIdentity(
 	query := `
 		INSERT INTO todoapp.user_oauth_identities (user_id, provider, provider_sub, email)
 			VALUES ($1, $2, $3, $4)
-		RETURNING user_id, provider, provider_sub, email, created_at
+		RETURNING id, user_id, provider, provider_sub, email, created_at
 	`
 
 	row := r.pool.QueryRow(
@@ -38,7 +38,7 @@ func (r *AuthRepository) CreateUserOAuthIdentity(
 		&identity.Provider,
 		&identity.ProviderSub,
 		&identity.Email,
-		&identity.CreateAt,
+		&identity.CreatedAt,
 	); err != nil {
 		return domain.UserOAuthIdentity{}, fmt.Errorf("scan error: %w", err)
 	}
