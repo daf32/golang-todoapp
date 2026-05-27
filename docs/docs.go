@@ -145,6 +145,96 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/oauth/{provider}": {
+            "get": {
+                "description": "Generates state and PKCE verifier, stores them in HttpOnly cookies and redirects the user to the provider's consent screen",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Start OAuth flow",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "OAuth provider name (e.g. google)",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect to the provider's OAuth consent screen"
+                    },
+                    "400": {
+                        "description": "Unknown OAuth provider",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/oauth/{provider}/callback": {
+            "get": {
+                "description": "Handles the provider's redirect after consent. Verifies state, exchanges the code via PKCE, finds or creates the user and issues tokens.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "OAuth callback",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "OAuth provider name (e.g. google)",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization code returned by the provider",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "State value returned by the provider, must match cookie",
+                        "name": "state",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful login via OAuth",
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.OAuthCallbackResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing/invalid state, verifier, code or unknown provider",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/refresh": {
             "post": {
                 "description": "Obtain a new access token",
@@ -242,6 +332,40 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/resend-confirmation": {
+            "post": {
+                "description": "Sends a new confirmation email if the address exists and is not yet verified",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Resend confirmation email",
+                "parameters": [
+                    {
+                        "description": "Email address",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.ResendConfirmationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad request",
                         "schema": {
                             "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
                         }
@@ -678,6 +802,12 @@ const docTemplate = `{
                         "description": "Users page shifting",
                         "name": "offset",
                         "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by email verification status",
+                        "name": "email_verified",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -916,6 +1046,76 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/{id}/password": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change the password of an existing user.\nThe caller must provide the current password and the new password (confirmed twice).\nRegular users can only change their own password. Admins can change any user's password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Change user password",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ChangeUserPassword request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_users_transport_http.ChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad request (validation failed)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -924,7 +1124,7 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "ivanivanov@example.ex"
+                    "example": "user@example.com"
                 },
                 "full_name": {
                     "type": "string",
@@ -969,18 +1169,18 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 255,
                     "minLength": 5,
-                    "example": "ivanivanov@example.ex"
+                    "example": "user@example.com"
                 },
                 "full_name": {
                     "type": "string",
                     "maxLength": 100,
                     "minLength": 3,
-                    "example": "Ivan Ivanov"
+                    "example": "user_name"
                 },
                 "password": {
                     "type": "string",
-                    "maxLength": 100,
-                    "minLength": 6,
+                    "maxLength": 72,
+                    "minLength": 8,
                     "example": "password_example"
                 },
                 "phone_number": {
@@ -996,7 +1196,7 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "ivanivanov@example.ex"
+                    "example": "user@example.com"
                 },
                 "full_name": {
                     "type": "string",
@@ -1027,13 +1227,13 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 255,
                     "minLength": 5,
-                    "example": "jebron.lames@goat.forever"
+                    "example": "user@example.com"
                 },
                 "password": {
                     "type": "string",
-                    "maxLength": 100,
-                    "minLength": 6,
-                    "example": "some_password"
+                    "maxLength": 72,
+                    "minLength": 8,
+                    "example": "user_password"
                 }
             }
         },
@@ -1064,6 +1264,19 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_features_auth_transport_http.OAuthCallbackResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "access_token"
+                },
+                "refresh_token": {
+                    "type": "string",
+                    "example": "refresh_token"
+                }
+            }
+        },
         "internal_features_auth_transport_http.RefreshRequest": {
             "type": "object",
             "required": [
@@ -1084,6 +1297,18 @@ const docTemplate = `{
                 "access_token": {
                     "type": "string",
                     "example": "access_token"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.ResendConfirmationRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
                 }
             }
         },
@@ -1118,13 +1343,13 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 1000,
                     "minLength": 1,
-                    "example": "Do homework"
+                    "example": "play_basketball"
                 },
                 "title": {
                     "type": "string",
                     "maxLength": 100,
                     "minLength": 1,
-                    "example": "Homework"
+                    "example": "basketball"
                 }
             }
         },
@@ -1214,7 +1439,7 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string",
-                    "example": "Play basketball"
+                    "example": "play_basketball"
                 }
             }
         },
@@ -1292,12 +1517,40 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_features_users_transport_http.ChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "confirm_password",
+                "new_password",
+                "password"
+            ],
+            "properties": {
+                "confirm_password": {
+                    "type": "string",
+                    "maxLength": 72,
+                    "minLength": 8,
+                    "example": "confirm_password"
+                },
+                "new_password": {
+                    "type": "string",
+                    "maxLength": 72,
+                    "minLength": 8,
+                    "example": "new_password"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 72,
+                    "minLength": 8,
+                    "example": "password"
+                }
+            }
+        },
         "internal_features_users_transport_http.GetUserResponse": {
             "type": "object",
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "ivanivanov@example.ex"
+                    "example": "user@example.com"
                 },
                 "full_name": {
                     "type": "string",
@@ -1322,11 +1575,11 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "jebron.lames@goat.forever"
+                    "example": "user@example.com"
                 },
                 "full_name": {
                     "type": "string",
-                    "example": "Jebron Lames"
+                    "example": "user_name"
                 },
                 "phone_number": {
                     "type": "string",
@@ -1339,7 +1592,7 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "ivanivanov@example.ex"
+                    "example": "user@example.com"
                 },
                 "full_name": {
                     "type": "string",

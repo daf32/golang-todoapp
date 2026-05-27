@@ -86,3 +86,12 @@ func (p *Pool) Exec(
 func (p *Pool) OpTimeout() time.Duration {
 	return p.opTimeout
 }
+
+func (p *Pool) BeginTx(ctx context.Context) (core_postgres_pool.Tx, error) {
+	tx, err := p.Pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("begin transaction: %w", err)
+	}
+
+	return pgxTx{tx}, nil
+}

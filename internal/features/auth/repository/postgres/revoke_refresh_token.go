@@ -8,7 +8,7 @@ import (
 	core_postgres_pool "github.com/daf32/golang-todoapp/internal/core/repository/postgres/pool"
 )
 
-func (r *RefreshTokenRepository) RevokeRefreshToken(
+func (r *AuthRepository) RevokeRefreshToken(
 	ctx context.Context,
 	tokenString string,
 ) error {

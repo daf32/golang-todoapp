@@ -1,0 +1,1 @@
+ALTER TABLE todoapp.users ADD COLUMN email_verified_at TIMESTAMPTZ;

@@ -1,4 +1,4 @@
-package auth_postgres_repository
+package users_postgres_repository
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	core_postgres_pool "github.com/daf32/golang-todoapp/internal/core/repository/postgres/pool"
 )
 
-func (r *RefreshTokenRepository) GetUserByEmail(
+func (r *UsersRepository) GetUserByEmail(
 	ctx context.Context,
 	email string,
 ) (domain.User, error) {
@@ -19,7 +19,7 @@ func (r *RefreshTokenRepository) GetUserByEmail(
 	defer cancel()
 
 	query := `
-	SELECT id, version, full_name, phone_number, email, password_hash, role FROM todoapp.users
+	SELECT id, version, full_name, phone_number, email, password_hash, role, email_verified, email_verified_at, created_at FROM todoapp.users
 	WHERE email=$1;
 	`
 
@@ -39,6 +39,9 @@ func (r *RefreshTokenRepository) GetUserByEmail(
 		&userModel.Email,
 		&userModel.PasswordHash,
 		&userModel.Role,
+		&userModel.EmailVerified,
+		&userModel.EmailVerifiedAt,
+		&userModel.CreatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, core_postgres_pool.ErrNoRows) {
@@ -60,5 +63,8 @@ func (r *RefreshTokenRepository) GetUserByEmail(
 		userModel.Email,
 		userModel.PasswordHash,
 		userModel.Role,
+		userModel.EmailVerified,
+		userModel.EmailVerifiedAt,
+		userModel.CreatedAt,
 	), nil
 }

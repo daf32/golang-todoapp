@@ -3,14 +3,15 @@ package auth_transport_http
 import (
 	"net/http"
 
+	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
 	core_http_request "github.com/daf32/golang-todoapp/internal/core/transport/http/request"
 	core_http_response "github.com/daf32/golang-todoapp/internal/core/transport/http/response"
 )
 
 type LoginUserRequest struct {
-	Email    string `json:"email"     validate:"required,min=5,max=255"  example:"jebron.lames@goat.forever"`
-	Password string `json:"password"  validate:"required,min=6,max=100"  example:"some_password"`
+	Email    string `json:"email"     validate:"required,min=5,max=255"  example:"user@example.com"`
+	Password string `json:"password"  validate:"required,min=8,max=72"   example:"user_password"`
 }
 
 type LoginUserResponse struct {
@@ -50,7 +51,7 @@ func (h *AuthHTTPHandler) LoginUser(rw http.ResponseWriter, r *http.Request) {
 	acessToken, refreshToken, err := h.authService.LoginUser(
 		ctx,
 		request.Email,
-		request.Password,
+		core_auth.PlainPassword(request.Password),
 	)
 	if err != nil {
 		responseHandler.ErrorResponse(

@@ -3,7 +3,7 @@ definitions:
   github_com_daf32_golang-todoapp_internal_core_transport_http_dto.UserDTOResponse:
     properties:
       email:
-        example: ivanivanov@example.ex
+        example: user@example.com
         type: string
       full_name:
         example: Ivan Ivanov
@@ -30,19 +30,19 @@ definitions:
   internal_features_auth_transport_http.CreateUserRequest:
     properties:
       email:
-        example: ivanivanov@example.ex
+        example: user@example.com
         maxLength: 255
         minLength: 5
         type: string
       full_name:
-        example: Ivan Ivanov
+        example: user_name
         maxLength: 100
         minLength: 3
         type: string
       password:
         example: password_example
-        maxLength: 100
-        minLength: 6
+        maxLength: 72
+        minLength: 8
         type: string
       phone_number:
         example: "+79998887766"
@@ -57,7 +57,7 @@ definitions:
   internal_features_auth_transport_http.CreateUserResponse:
     properties:
       email:
-        example: ivanivanov@example.ex
+        example: user@example.com
         type: string
       full_name:
         example: Ivan Ivanov
@@ -75,14 +75,14 @@ definitions:
   internal_features_auth_transport_http.LoginUserRequest:
     properties:
       email:
-        example: jebron.lames@goat.forever
+        example: user@example.com
         maxLength: 255
         minLength: 5
         type: string
       password:
-        example: some_password
-        maxLength: 100
-        minLength: 6
+        example: user_password
+        maxLength: 72
+        minLength: 8
         type: string
     required:
     - email
@@ -107,6 +107,15 @@ definitions:
     required:
     - refresh_token
     type: object
+  internal_features_auth_transport_http.OAuthCallbackResponse:
+    properties:
+      access_token:
+        example: access_token
+        type: string
+      refresh_token:
+        example: refresh_token
+        type: string
+    type: object
   internal_features_auth_transport_http.RefreshRequest:
     properties:
       refresh_token:
@@ -122,6 +131,14 @@ definitions:
       access_token:
         example: access_token
         type: string
+    type: object
+  internal_features_auth_transport_http.ResendConfirmationRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+    required:
+    - email
     type: object
   internal_features_statistics_transport_http.GetStatisticsResponse:
     properties:
@@ -141,12 +158,12 @@ definitions:
   internal_features_tasks_transport_http.CreateTaskRequest:
     properties:
       description:
-        example: Do homework
+        example: play_basketball
         maxLength: 1000
         minLength: 1
         type: string
       title:
-        example: Homework
+        example: basketball
         maxLength: 100
         minLength: 1
         type: string
@@ -215,7 +232,7 @@ definitions:
         example: "null"
         type: string
       title:
-        example: Play basketball
+        example: play_basketball
         type: string
     type: object
   internal_features_tasks_transport_http.PatchUserResponse:
@@ -272,10 +289,32 @@ definitions:
         example: 3
         type: integer
     type: object
+  internal_features_users_transport_http.ChangePasswordRequest:
+    properties:
+      confirm_password:
+        example: confirm_password
+        maxLength: 72
+        minLength: 8
+        type: string
+      new_password:
+        example: new_password
+        maxLength: 72
+        minLength: 8
+        type: string
+      password:
+        example: password
+        maxLength: 72
+        minLength: 8
+        type: string
+    required:
+    - confirm_password
+    - new_password
+    - password
+    type: object
   internal_features_users_transport_http.GetUserResponse:
     properties:
       email:
-        example: ivanivanov@example.ex
+        example: user@example.com
         type: string
       full_name:
         example: Ivan Ivanov
@@ -293,10 +332,10 @@ definitions:
   internal_features_users_transport_http.PatchUserRequest:
     properties:
       email:
-        example: jebron.lames@goat.forever
+        example: user@example.com
         type: string
       full_name:
-        example: Jebron Lames
+        example: user_name
         type: string
       phone_number:
         example: "+71112223344"
@@ -305,7 +344,7 @@ definitions:
   internal_features_users_transport_http.PatchUserResponse:
     properties:
       email:
-        example: ivanivanov@example.ex
+        example: user@example.com
         type: string
       full_name:
         example: Ivan Ivanov
@@ -411,6 +450,68 @@ paths:
       summary: Logout user
       tags:
       - auth
+  /auth/oauth/{provider}:
+    get:
+      description: Generates state and PKCE verifier, stores them in HttpOnly cookies
+        and redirects the user to the provider's consent screen
+      parameters:
+      - description: OAuth provider name (e.g. google)
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses:
+        "302":
+          description: Redirect to the provider's OAuth consent screen
+        "400":
+          description: Unknown OAuth provider
+          schema:
+            $ref: '#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse'
+      summary: Start OAuth flow
+      tags:
+      - auth
+  /auth/oauth/{provider}/callback:
+    get:
+      description: Handles the provider's redirect after consent. Verifies state,
+        exchanges the code via PKCE, finds or creates the user and issues tokens.
+      parameters:
+      - description: OAuth provider name (e.g. google)
+        in: path
+        name: provider
+        required: true
+        type: string
+      - description: Authorization code returned by the provider
+        in: query
+        name: code
+        required: true
+        type: string
+      - description: State value returned by the provider, must match cookie
+        in: query
+        name: state
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful login via OAuth
+          schema:
+            $ref: '#/definitions/internal_features_auth_transport_http.OAuthCallbackResponse'
+        "400":
+          description: Missing/invalid state, verifier, code or unknown provider
+          schema:
+            $ref: '#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse'
+      summary: OAuth callback
+      tags:
+      - auth
   /auth/refresh:
     post:
       consumes:
@@ -477,6 +578,29 @@ paths:
           schema:
             $ref: '#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse'
       summary: Create user
+      tags:
+      - auth
+  /auth/resend-confirmation:
+    post:
+      consumes:
+      - application/json
+      description: Sends a new confirmation email if the address exists and is not
+        yet verified
+      parameters:
+      - description: Email address
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_features_auth_transport_http.ResendConfirmationRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse'
+      summary: Resend confirmation email
       tags:
       - auth
   /statistics:
@@ -757,6 +881,10 @@ paths:
         in: query
         name: offset
         type: integer
+      - description: Filter by email verification status
+        in: query
+        name: email_verified
+        type: boolean
       produces:
       - application/json
       responses:
@@ -920,6 +1048,54 @@ paths:
       security:
       - BearerAuth: []
       summary: Change user
+      tags:
+      - users
+  /users/{id}/password:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Change the password of an existing user.
+        The caller must provide the current password and the new password (confirmed twice).
+        Regular users can only change their own password. Admins can change any user's password.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ChangeUserPassword request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_features_users_transport_http.ChangePasswordRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad request (validation failed)
+          schema:
+            $ref: '#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_daf32_golang-todoapp_internal_core_transport_http_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Change user password
       tags:
       - users
 securityDefinitions:

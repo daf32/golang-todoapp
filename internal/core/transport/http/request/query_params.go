@@ -50,3 +50,20 @@ func GetDateQueryParam(r *http.Request, key string) (*time.Time, error) {
 
 	return &date, nil
 }
+
+func GetBoolQueryParam(r *http.Request, key string) (*bool, error) {
+	param := r.URL.Query().Get(key)
+	if param == "" {
+		return nil, nil
+	}
+
+	val, err := strconv.ParseBool(param)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"param='%s' by key='%s' not a valid bool: %v: %w",
+			param, key, err, core_errors.ErrInvalidArgument,
+		)
+	}
+
+	return &val, nil
+}

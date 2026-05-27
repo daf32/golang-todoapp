@@ -8,10 +8,9 @@ import (
 )
 
 type Config struct {
-	TimeZone           *time.Location `envconfig:"TIME_ZONE"                  default:"UTC"`
-	JWTSecret          string         `envconfig:"AUTH_JWT_SECRET"            required:"true"`
-	AccessTokenExpiry  time.Duration  `envconfig:"AUTH_ACCESS_TOKEN_EXPIRY"   default:"15m"`
-	RefreshTokenExpiry time.Duration  `envconfig:"AUTH_REFRESH_TOKEN_EXPIRY"  default:"7d"`
+	TimeZone     *time.Location `envconfig:"TIME_ZONE"     default:"UTC"`
+	AppBaseURL   string         `envconfig:"APP_BASE_URL"  required:"true"`
+	CookieSecure bool           `envconfig:"COOKIE_SECURE" default:"true"`
 }
 
 func NewConfig() (Config, error) {

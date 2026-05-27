@@ -72,7 +72,7 @@ func TestGetUser(t *testing.T) {
 				).Return(tc.repositoryUser, tc.repositoryErr).Once()
 			}
 
-			srvc := users_service.NewUsersService(repo)
+			srvc := users_service.NewUsersService(repo, nil, nil)
 
 			got, err := srvc.GetUser(tc.ctx, tc.actor, tc.id)
 

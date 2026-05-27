@@ -8,6 +8,11 @@ CREATE TABLE todoapp.users (
         phone_number ~ '^\+[0-9]+$'
         AND
         char_length(phone_number) BETWEEN 10 AND 15
+    ),
+    email          VARCHAR(255)     NOT NULL    CHECK (
+        email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        AND
+        char_length(email) BETWEEN 5 AND 255
     )
 );
 
@@ -26,7 +31,5 @@ CREATE TABLE todoapp.tasks (
         (completed=TRUE AND completed_at IS NOT NULL AND completed_at >= created_at)
     ),
 
-    author_user_id  INTEGER         NOT NULL  REFERENCES todoapp.users(id)
+    author_user_id  INTEGER         NOT NULL  REFERENCES todoapp.users(id) ON DELETE CASCADE
 );
-
-

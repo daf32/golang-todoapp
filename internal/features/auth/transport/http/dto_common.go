@@ -3,7 +3,7 @@ package auth_transport_http
 import (
 	"time"
 
-	"github.com/daf32/golang-todoapp/internal/core/domain"
+	core_auth "github.com/daf32/golang-todoapp/internal/core/auth"
 	"github.com/google/uuid"
 )
 
@@ -16,13 +16,13 @@ type RefreshTokenDTOResponse struct {
 	Revoked   bool      `json:"revoked" example:"false"`
 }
 
-func refreshTokenDTOFromDomain(refreshToken domain.RefreshToken) RefreshTokenDTOResponse {
+func refreshTokenDTOFromDomain(refreshToken core_auth.RefreshToken) RefreshTokenDTOResponse {
 	return RefreshTokenDTOResponse{
-		ID: refreshToken.ID,
-		UserID: refreshToken.UserID,
-		Token: refreshToken.Token,
+		ID:        refreshToken.ID,
+		UserID:    refreshToken.UserID,
+		Token:     refreshToken.Token,
 		ExpiresAt: refreshToken.ExpiresAt,
 		CreatedAt: refreshToken.CreatedAt,
-		Revoked: refreshToken.Revoked,
+		Revoked:   refreshToken.Revoked,
 	}
 }

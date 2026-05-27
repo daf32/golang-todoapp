@@ -14,10 +14,11 @@ import (
 
 func TestGetUsers(t *testing.T) {
 	repositoryErr := errors.New("repository unavailable")
-	validLimit := intPtr(10)
-	validOffset := intPtr(0)
-	negativeLimit := intPtr(-1)
-	negativeOffset := intPtr(-1)
+	validLimit := typePtr[int](10)
+	validOffset := typePtr[int](0)
+	validEmailVerified := typePtr[bool](true)
+	negativeLimit := typePtr[int](-1)
+	negativeOffset := typePtr[int](-1)
 
 	secondUser := validUser()
 	secondUser.ID = 2
@@ -35,6 +36,7 @@ func TestGetUsers(t *testing.T) {
 		ctx             context.Context
 		limit           *int
 		offset          *int
+		emailVerified   *bool
 		repositoryUsers []domain.User
 		repositoryErr   error
 		wantServiceErr  error
@@ -45,6 +47,7 @@ func TestGetUsers(t *testing.T) {
 			ctx:             context.Background(),
 			limit:           validLimit,
 			offset:          validOffset,
+			emailVerified:   validEmailVerified,
 			repositoryUsers: repositoryUsers,
 			wantRepoCalled:  true,
 		},
@@ -53,6 +56,7 @@ func TestGetUsers(t *testing.T) {
 			ctx:            context.Background(),
 			limit:          validLimit,
 			offset:         validOffset,
+			emailVerified:  validEmailVerified,
 			repositoryErr:  repositoryErr,
 			wantServiceErr: repositoryErr,
 			wantRepoCalled: true,
@@ -62,6 +66,7 @@ func TestGetUsers(t *testing.T) {
 			ctx:            context.Background(),
 			limit:          negativeLimit,
 			offset:         validOffset,
+			emailVerified:  validEmailVerified,
 			wantServiceErr: core_errors.ErrInvalidArgument,
 			wantRepoCalled: false,
 		},
@@ -70,6 +75,7 @@ func TestGetUsers(t *testing.T) {
 			ctx:            context.Background(),
 			limit:          validLimit,
 			offset:         negativeOffset,
+			emailVerified:  validEmailVerified,
 			wantServiceErr: core_errors.ErrInvalidArgument,
 			wantRepoCalled: false,
 		},
@@ -88,15 +94,17 @@ func TestGetUsers(t *testing.T) {
 					tc.ctx,
 					tc.limit,
 					tc.offset,
+					tc.emailVerified,
 				).Return(tc.repositoryUsers, tc.repositoryErr).Once()
 			}
 
-			srvc := users_service.NewUsersService(repo)
+			srvc := users_service.NewUsersService(repo, nil, nil)
 
 			users, err := srvc.GetUsers(
 				tc.ctx,
 				tc.limit,
 				tc.offset,
+				tc.emailVerified,
 			)
 
 			if tc.wantServiceErr != nil {
@@ -108,6 +116,7 @@ func TestGetUsers(t *testing.T) {
 						tc.ctx,
 						tc.limit,
 						tc.offset,
+						tc.emailVerified,
 					)
 				}
 				return

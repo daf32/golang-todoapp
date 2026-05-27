@@ -1,8 +1,9 @@
-package domain
+package core_auth
 
 import (
 	"time"
 
+	"github.com/daf32/golang-todoapp/internal/core/domain"
 	"github.com/google/uuid"
 )
 
@@ -39,7 +40,7 @@ func NewRefreshTokenUninitialized(
 	expiredAt time.Time,
 ) RefreshToken {
 	return NewRefreshToken(
-		UninitializedUID,
+		domain.UninitializedUID,
 		userID,
 		token,
 		expiredAt,

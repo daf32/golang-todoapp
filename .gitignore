@@ -48,7 +48,6 @@ tmp/
 temp/
 out
 
-AGENTS.md
 CLAUDE.md
 
 /frontend/node_modules
