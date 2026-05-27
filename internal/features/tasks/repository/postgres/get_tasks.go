@@ -17,7 +17,7 @@ func (r *TasksRepository) GetTasks(
 	defer cancel()
 
 	query := `
-	SELECT id, version, title, description, completed, created_at, completed_at, author_user_id
+	SELECT id, version, title, description, completed, created_at, completed_at, author_user_id, date
 	FROM todoapp.tasks
 	%s
 	ORDER BY id ASC
@@ -58,6 +58,7 @@ func (r *TasksRepository) GetTasks(
 			&taskModel.CreatedAt,
 			&taskModel.CompletedAt,
 			&taskModel.AuthorUserID,
+			&taskModel.Date,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("scan tasks: %w", err)

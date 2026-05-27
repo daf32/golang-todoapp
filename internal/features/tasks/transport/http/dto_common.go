@@ -15,6 +15,7 @@ type TaskDTOResponse struct {
 	CreatedAt    time.Time  `json:"created_at" example:"2026-02-26T10:30:00Z"`
 	CompletedAt  *time.Time `json:"completed_at" example:"null"`
 	AuthorUserID int        `json:"author_user_id" example:"5"`
+	Date         time.Time  `json:"date" example:"2026-05-26T10:55:34Z"`
 }
 
 func taskDTOFromDomain(task domain.Task) TaskDTOResponse {
@@ -27,6 +28,7 @@ func taskDTOFromDomain(task domain.Task) TaskDTOResponse {
 		CreatedAt:    task.CreatedAt,
 		CompletedAt:  task.CompletedAt,
 		AuthorUserID: task.AuthorUserID,
+		Date:         task.Date,
 	}
 }
 
@@ -35,6 +37,6 @@ func taskDTOsFromDomains(tasks []domain.Task) []TaskDTOResponse {
 	for i, task := range tasks {
 		dtos[i] = taskDTOFromDomain(task)
 	}
-	
+
 	return dtos
 }
