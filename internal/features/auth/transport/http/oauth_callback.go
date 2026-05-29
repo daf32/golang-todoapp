@@ -4,11 +4,14 @@ import (
 	"crypto/subtle"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	core_errors "github.com/daf32/golang-todoapp/internal/core/errors"
 	core_logger "github.com/daf32/golang-todoapp/internal/core/logger"
 	core_http_response "github.com/daf32/golang-todoapp/internal/core/transport/http/response"
 )
+
+const oauthSuccessRedirectPath = "/oauth-callback"
 
 type OAuthCallbackResponse struct {
 	AccessToken  string `json:"access_token"  example:"access_token"`
@@ -84,11 +87,12 @@ func (h *AuthHTTPHandler) OAuthCallback(rw http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	responseHandler.JSONResponse(
-		OAuthCallbackResponse{
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken.Token,
-		},
-		http.StatusOK,
-	)
+	// Redirect to the frontend with tokens in the URL fragment.
+	// Fragments aren't sent to the server on subsequent requests and don't
+	// appear in server access logs, so they're a safer transport than query
+	// strings for short-lived secrets handed off to the SPA.
+	fragment := url.Values{}
+	fragment.Set("access_token", accessToken)
+	fragment.Set("refresh_token", refreshToken.Token)
+	http.Redirect(rw, r, h.appBaseURL+oauthSuccessRedirectPath+"#"+fragment.Encode(), http.StatusFound)
 }
