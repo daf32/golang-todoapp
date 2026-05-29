@@ -1,0 +1,302 @@
+/* =========================================================================
+   golang-todoapp — Frontend design
+   Strict-monochrome "ink" system. Light / Dark themes via [data-theme].
+   Built on the Golang Todo Design System tokens.
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ---------- Theme: LIGHT (default) ---------- */
+:root,
+[data-theme="light"] {
+  --app-bg:        #f5f5f7;   /* parchment canvas */
+  --surface:       #ffffff;   /* cards */
+  --surface-2:     #fafafc;   /* pearl / secondary */
+  --surface-muted: #f0f0f2;   /* hover, chips, skeleton */
+  --rail-bg:       #ffffff;
+
+  --text:    #1d1d1f;   /* ink */
+  --text-2:  #424245;
+  --text-3:  #7a7a7a;
+  --text-4:  #a8a8ad;
+
+  --accent:     #1d1d1f;   /* ink carries the single accent */
+  --on-accent:  #ffffff;
+
+  --hairline: #e6e6e8;
+  --divider:  #f0f0f0;
+  --hairline-alpha: rgba(0,0,0,0.05);
+  --hover-darken: rgba(0,0,0,0.04);
+
+  --green: #1f9d4d;
+  --red:   #e0392b;
+  --green-soft: rgba(48,209,88,0.14);
+
+  --shadow-pane:    0 2px 24px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-pane-lg: 0 12px 48px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.05);
+  --shadow-rail:    1px 0 0 var(--hairline);
+
+  color-scheme: light;
+}
+
+/* ---------- Theme: DARK ---------- */
+[data-theme="dark"] {
+  --app-bg:        #000000;
+  --surface:       #1a1a1c;
+  --surface-2:     #1f1f22;
+  --surface-muted: #2a2a2e;
+  --rail-bg:       #0c0c0d;
+
+  --text:    #f5f5f7;
+  --text-2:  #c7c7cc;
+  --text-3:  #98989f;
+  --text-4:  #636366;
+
+  --accent:     #f5f5f7;   /* in dark, the ink turns to light */
+  --on-accent:  #1d1d1f;
+
+  --hairline: #2c2c2e;
+  --divider:  #232325;
+  --hairline-alpha: rgba(255,255,255,0.06);
+  --hover-darken: rgba(255,255,255,0.06);
+
+  --green: #30d158;
+  --red:   #ff5247;
+  --green-soft: rgba(48,209,88,0.16);
+
+  --shadow-pane:    0 2px 24px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-pane-lg: 0 16px 56px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4);
+  --shadow-rail:    1px 0 0 var(--hairline);
+
+  color-scheme: dark;
+}
+
+:root {
+  --font-display: 'SF Pro Display', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-text:    'SF Pro Text', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --ease:   cubic-bezier(0.2, 0, 0, 1);
+  --t-quick: 130ms;
+  --t-mount: 260ms;
+
+  --rail-w: 76px;
+  --side-w: 264px;
+}
+
+/* =========================================================================
+   Reset
+   ========================================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--app-bg);
+  color: var(--text);
+  font-family: var(--font-text);
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.36px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button { font-family: inherit; color: inherit; cursor: pointer; border: none; background: none; }
+input, textarea, select { font-family: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+::selection { background: var(--text); color: var(--surface); }
+
+/* scrollbars */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--text-4); background-clip: content-box; }
+
+/* =========================================================================
+   Type helpers
+   ========================================================================= */
+.t-display { font-family: var(--font-display); font-weight: 600; font-size: 40px; line-height: 1.08; letter-spacing: -1px; }
+.t-h1      { font-family: var(--font-display); font-weight: 600; font-size: 28px; line-height: 1.14; letter-spacing: -0.6px; }
+.t-h2      { font-family: var(--font-display); font-weight: 600; font-size: 21px; line-height: 1.2;  letter-spacing: -0.4px; }
+.t-body    { font-size: 17px; line-height: 1.47; letter-spacing: -0.36px; }
+.t-caption { font-size: 14px; line-height: 1.43; letter-spacing: -0.2px; }
+.t-fine    { font-size: 12px; line-height: 1.3; letter-spacing: -0.1px; }
+.t-mono-num{ font-family: var(--font-display); font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+.fg-2 { color: var(--text-2); }
+.fg-3 { color: var(--text-3); }
+.fg-4 { color: var(--text-4); }
+
+/* =========================================================================
+   Primitives — press / hover / focus
+   ========================================================================= */
+.press { transition: transform var(--t-quick) var(--ease), background-color var(--t-quick) var(--ease), box-shadow var(--t-quick) var(--ease), opacity var(--t-quick) var(--ease), border-color var(--t-quick) var(--ease); }
+.press:active { transform: scale(0.96); }
+
+:where(button, a, [role="button"]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 7px;
+}
+
+/* =========================================================================
+   Buttons
+   ========================================================================= */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 44px; padding: 0 20px;
+  border-radius: 9999px;
+  font-family: var(--font-text); font-size: 16px; font-weight: 400;
+  letter-spacing: -0.2px; white-space: nowrap;
+  transition: transform var(--t-quick) var(--ease), background-color var(--t-quick) var(--ease), box-shadow var(--t-quick) var(--ease), opacity var(--t-quick) var(--ease);
+}
+.btn:active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.45; pointer-events: none; }
+
+.btn-primary { background: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.16); }
+
+.btn-pearl { background: var(--surface-muted); color: var(--text); }
+.btn-pearl:hover { background: var(--hairline); }
+
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--hairline); }
+.btn-ghost:hover { background: var(--hover-darken); }
+
+.btn-sm { height: 36px; padding: 0 14px; font-size: 14px; }
+.btn-block { width: 100%; }
+
+/* =========================================================================
+   Pills / chips
+   ========================================================================= */
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 12px;
+  border-radius: 9999px;
+  background: var(--surface-muted); color: var(--text-2);
+  font-size: 13px; letter-spacing: -0.1px; font-weight: 400;
+  white-space: nowrap;
+}
+.pill.ink { background: var(--accent); color: var(--on-accent); }
+.pill.outline { background: transparent; border: 1px solid var(--hairline); }
+.pill-count { min-width: 22px; height: 22px; padding: 0 7px; justify-content: center; font-size: 12px; }
+
+/* =========================================================================
+   Fields
+   ========================================================================= */
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field-label { font-size: 13px; font-weight: 600; letter-spacing: -0.1px; color: var(--text-2); }
+.input {
+  height: 48px; padding: 0 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: 11px;
+  font-size: 16px; letter-spacing: -0.2px; color: var(--text);
+  transition: border-color var(--t-quick) var(--ease), box-shadow var(--t-quick) var(--ease), background var(--t-quick) var(--ease);
+  width: 100%;
+}
+.input::placeholder { color: var(--text-4); }
+.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--hairline-alpha); background: var(--surface); }
+textarea.input { height: auto; padding: 12px 14px; resize: none; line-height: 1.45; }
+
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-wrap .icon-lead { position: absolute; left: 14px; color: var(--text-4); pointer-events: none; display: flex; }
+.input-wrap .input { padding-left: 42px; }
+
+/* search */
+.search {
+  display: flex; align-items: center; gap: 9px;
+  height: 40px; padding: 0 14px;
+  background: var(--surface-muted);
+  border-radius: 9999px;
+  color: var(--text-3);
+  transition: background 260ms var(--ease), box-shadow 260ms var(--ease), transform 260ms var(--ease);
+  flex: 1; min-width: 0;
+}
+.search:focus-within { background: var(--surface); box-shadow: 0 0 0 1px var(--hairline), var(--shadow-pane-lg); transform: translateY(-1px); }
+.search > svg { transition: color 260ms var(--ease), transform 260ms var(--ease); }
+.search:focus-within > svg { color: var(--text); transform: scale(1.06); }
+.search input { border: none; background: none; outline: none; flex: 1; min-width: 0; font-size: 15px; color: var(--text); letter-spacing: -0.2px; }
+.search input::placeholder { color: var(--text-4); }
+
+/* =========================================================================
+   Segmented control
+   ========================================================================= */
+.segmented {
+  position: relative;
+  display: inline-flex; padding: 3px; gap: 2px;
+  background: var(--surface-muted);
+  border-radius: 9999px;
+}
+.segmented button {
+  height: 32px; padding: 0 16px;
+  border-radius: 9999px;
+  font-size: 13.5px; font-weight: 500; letter-spacing: -0.1px;
+  color: var(--text-3);
+  transition: color var(--t-quick) var(--ease);
+  position: relative; z-index: 1;
+}
+.segmented button.active { color: var(--text); }
+.segmented .seg-thumb {
+  position: absolute; z-index: 0;
+  background: var(--surface);
+  border-radius: 9999px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  transition: left 240ms var(--ease), width 240ms var(--ease);
+}
+[data-theme="dark"] .segmented .seg-thumb { background: var(--surface-muted); box-shadow: inset 0 0 0 1px var(--hairline); }
+
+/* =========================================================================
+   Cards / panes
+   ========================================================================= */
+.pane {
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: var(--shadow-pane);
+}
+.card {
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: var(--shadow-pane);
+}
+
+.section-label {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; color: var(--text-4);
+}
+
+/* =========================================================================
+   Animations
+   ========================================================================= */
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop  { 0% { transform: scale(0.8); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes drawCheck { from { stroke-dashoffset: 22; } to { stroke-dashoffset: 0; } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.96) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes shimmer { 0% { background-position: -340px 0; } 100% { background-position: 340px 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.rise { animation: rise var(--t-mount) var(--ease) both; }
+.fade { animation: fade var(--t-mount) var(--ease) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* spinner */
+.spinner { width: 26px; height: 26px; border-radius: 50%; border: 2.5px solid var(--hairline); border-top-color: var(--text); animation: spin 0.7s linear infinite; }
+
+/* skeleton */
+.skeleton { background: var(--surface-muted); border-radius: 8px; position: relative; overflow: hidden; }
+.skeleton::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, var(--hover-darken), transparent);
+  background-size: 680px 100%;
+  animation: shimmer 1.3s linear infinite;
+}
